@@ -1,5 +1,8 @@
 import { Firecrawl } from "firecrawl";
 import { ValidationError } from "../types/app-error.js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export async function scrapeWebsite(url: string) {
   const apiKey = process.env.FIRECRAWL_API_KEY;

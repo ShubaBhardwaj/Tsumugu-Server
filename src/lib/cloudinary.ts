@@ -70,7 +70,7 @@ export async function uploadPdfToCloudinary(
     filename,
   );
   form.append("upload_preset", uploadPreset);
-  form.append("folder", "chaibook/pdfs");
+  form.append("folder", "tsumugu/pdfs");
 
   const response = await fetch(
     `https://api.cloudinary.com/v1_1/${cloudName}/raw/upload`,
