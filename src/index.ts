@@ -1,8 +1,12 @@
 import express from "express";
 import dotenv from "dotenv";
+import { auth } from "./lib/auth.js";
+import { toNodeHandler } from "better-auth/node";
 
 dotenv.config();
 const app = express();
+
+app.all("/api/auth/*", toNodeHandler(auth));
 
 app.use(express.json());
 
