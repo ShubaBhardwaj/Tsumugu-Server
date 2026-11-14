@@ -397,7 +397,6 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 
 export const ModelName = {
-  Test: 'Test',
   User: 'User',
   Session: 'Session',
   Account: 'Account',
@@ -423,84 +422,10 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "test" | "user" | "session" | "account" | "verification" | "workspace" | "source" | "sourceChunk" | "conversation" | "message" | "learningArtifact"
+    modelProps: "user" | "session" | "account" | "verification" | "workspace" | "source" | "sourceChunk" | "conversation" | "message" | "learningArtifact"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
-    Test: {
-      payload: Prisma.$TestPayload<ExtArgs>
-      fields: Prisma.TestFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.TestFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.TestFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestPayload>
-        }
-        findFirst: {
-          args: Prisma.TestFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.TestFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestPayload>
-        }
-        findMany: {
-          args: Prisma.TestFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestPayload>[]
-        }
-        create: {
-          args: Prisma.TestCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestPayload>
-        }
-        createMany: {
-          args: Prisma.TestCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.TestCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestPayload>[]
-        }
-        delete: {
-          args: Prisma.TestDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestPayload>
-        }
-        update: {
-          args: Prisma.TestUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestPayload>
-        }
-        deleteMany: {
-          args: Prisma.TestDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.TestUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.TestUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestPayload>[]
-        }
-        upsert: {
-          args: Prisma.TestUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TestPayload>
-        }
-        aggregate: {
-          args: Prisma.TestAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateTest>
-        }
-        groupBy: {
-          args: Prisma.TestGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.TestGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.TestCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.TestCountAggregateOutputType> | number
-        }
-      }
-    }
     User: {
       payload: Prisma.$UserPayload<ExtArgs>
       fields: Prisma.UserFieldRefs
@@ -1280,14 +1205,6 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
-export const TestScalarFieldEnum = {
-  id: 'id',
-  title: 'title'
-} as const
-
-export type TestScalarFieldEnum = (typeof TestScalarFieldEnum)[keyof typeof TestScalarFieldEnum]
-
-
 export const UserScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -1775,7 +1692,6 @@ export interface PrismaClientOptionsWithAdapter extends PrismaClientBaseOptions 
  */
 export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaClientOptionsWithAdapter
 export type GlobalOmitConfig = {
-  test?: Prisma.TestOmit
   user?: Prisma.UserOmit
   session?: Prisma.SessionOmit
   account?: Prisma.AccountOmit
