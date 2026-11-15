@@ -8,6 +8,7 @@ process.env.BETTER_AUTH_SECRET =
   "test-only-secret-with-at-least-thirty-two-characters";
 process.env.GOOGLE_CLIENT_ID = "test-client";
 process.env.GOOGLE_CLIENT_SECRET = "test-secret";
+process.env.CLOUDINARY_CLOUD_NAME = "test-cloud";
 for (const key of [
   "OPENAI_API_KEY",
   "MEM0_API_KEY",

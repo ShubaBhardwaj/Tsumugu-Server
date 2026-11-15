@@ -11,6 +11,7 @@ import {
   type WorkspaceRecord,
 } from "../repository/workspace.repository.js";
 import { NotFoundError } from "../types/app-error.js";
+import { resolveMobileWorkspace } from "../repository/mobile.repository.js";
 import {
   CreateWorkspaceInput,
   UpdateWorkspaceInput,
@@ -37,8 +38,14 @@ export function createWorkspaceForUser(
   userId: string,
   input: CreateWorkspaceInput,
 ) {
+  if (input.clientCollectionKey)
+    return resolveMobileWorkspace(userId, input).then(
+      (result) => result.workspace,
+    );
   return createWorkspaceRecord(userId, input);
 }
+
+export { resolveMobileWorkspace };
 
 export async function updateWorkspaceForUser(
   workspaceId: string,
@@ -66,11 +73,25 @@ export async function deleteWorkspaceForUser(
       where: { id: workspaceId },
       data: { deletedAt: new Date() },
     });
+    await tx.mobileWorkspaceBinding.updateMany({
+      where: { workspaceId },
+      data: { deletedAt: new Date() },
+    });
+    await tx.mobileSourceBinding.updateMany({
+      where: { workspaceId },
+      data: { deletedAt: new Date() },
+    });
     await tx.backgroundJob.updateMany({
       where: {
         workspaceId,
         status: { in: ["PENDING", "DISPATCHED", "RUNNING"] },
-        type: { notIn: ["SOURCE_CLEANUP", "WORKSPACE_CLEANUP"] },
+        type: {
+          notIn: [
+            "SOURCE_CLEANUP",
+            "WORKSPACE_CLEANUP",
+            "REPRESENTATION_CLEANUP",
+          ],
+        },
       },
       data: { status: "CANCELLED" },
     });

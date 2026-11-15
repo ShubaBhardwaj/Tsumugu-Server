@@ -91,7 +91,20 @@ After repairing local worker/database setup, run `bun run jobs:recover`. The com
 
 ## Conversation summaries and optional services
 
-After each eight saved messages, a summary job uses the previous summary plus only messages after the saved position. Input is bounded to 24,000 characters; larger backlogs are processed in order. Summary output is at most 2,000 characters and 250 words. Text and covered position are saved together. Memory learning is a separate durable job for a completed exchange: a Mem0 outage does not regenerate a successful summary. Missing optional Mem0/Tavily settings disable their features. A transient memory-search outage allows chat to continue without personal-memory context.
+After each eight saved messages, a summary job uses the previous summary plus only messages after the saved position. Input is bounded to 24,000 characters; larger backlogs are processed in order. Summary output is at most 2,000 characters and 250 words. Text and covered position are saved together. Collection chat does not search or learn account-wide Mem0 memories, even when configured. Legacy collection MEMORY jobs are cancelled; manual memory APIs and existing provider data remain available. Conversation summaries stay scoped to their own conversation.
+
+Chat uses only active-workspace sources and owned persisted conversation context. Source excerpts and tool results are untrusted data. Missing evidence must produce an honest limitation. Outside search runs only with explicit `webSearch: true`; an unconfigured service returns 503 `WEB_SEARCH_UNAVAILABLE` before creating a conversation or saving a user turn. Completed history citations include `label`: numeric strings for collection references and `W1`, `W2`, etc. for outside web references. Labels accumulate across tool calls; outside results are not imported as sources.
+
+## Native authentication and mobile contract
+
+The server uses `@better-auth/expo` **1.7.23**, matching Better Auth **1.7.23**, following the [official Expo integration](https://better-auth.com/docs/integrations/expo). Google remains the sole login provider. No password registration or alternative JWT flow is enabled.
+
+Configure the Google **web OAuth client** redirect URI as `<BETTER_AUTH_URL>/api/auth/callback/google`. This server callback is separate from the app return URL, for example `tsumugu://auth/callback`. The auth instance trusts `CLIENT_URL` and the `tsumugu` native scheme, with no arbitrary production origin or Expo wildcard. The plugin itself adds `exp://` only in development. Browser CORS retains only `CLIENT_URL`, credentials and exposed `X-Conversation-Id`; native callback schemes are not CORS origins.
+
+The later mobile auth phase should use the Better Auth React client with `expoClient`, the existing `tsumugu` scheme, and SecureStore. For custom API requests, retrieve the current cookie using `authClient.getCookie()`, attach the `Cookie` header and use native `credentials: "omit"`. Browsers keep credentialed cookies. `BETTER_AUTH_URL` must be reachable from the phone and match the OAuth setup; a phone's localhost is not the development computer. Only the API base URL belongs in mobile public configuration. Live Google login/cancellation and phone cookie handling remain separate verification gates.
+
+See [Mobile API contract v1](docs/mobile-api-v1.md) for exact identity fields, fingerprint fixtures, request/response examples, errors, replacement/recreation semantics and the artifact options matrix. The same endpoints continue to accept legacy requests without mobile metadata. Mobile Analyze is client orchestration over per-source jobs, not a new batch endpoint. It must occur only after the user's explicit consent.
+
 
 ## Verification
 
@@ -99,4 +112,4 @@ After each eight saved messages, a summary job uses the previous summary plus on
 - `bun run test:db`: creates a fresh temporary local PostgreSQL cluster, applies migrations, runs all tests including upgrade fixtures and HTTP/worker flows, then stops and removes only that cluster. It never uses your normal `DATABASE_URL`. PostgreSQL binaries default to `/opt/homebrew/opt/postgresql@15/bin`; set `PG_BIN` elsewhere.
 - `bun run typecheck`, `bun run build`, and `bunx --no-install prisma validate`: compiler/build/schema checks.
 
-Tests use stubbed auth/provider responses and block unstubbed external fetches. Database guards reject remote hosts and database names outside `tsumugu_test` / `tsumugu_test_*`. Integration tests truncate their disposable database, so do not point them at a database containing wanted data. Live Google OAuth, external provider credentials/permissions, and hosted Inngest registration require separate smoke verification and are not proven by stubbed tests.
+Tests exercise real Better Auth session validation and controlled authentication/provider responses and block unstubbed external fetches. Database guards reject remote hosts and database names outside `tsumugu_test` / `tsumugu_test_*`. Integration tests truncate their disposable database, so do not point them at a database containing wanted data. Live Google OAuth, external provider credentials/permissions, and hosted Inngest registration require separate smoke verification and are not proven by stubbed tests.

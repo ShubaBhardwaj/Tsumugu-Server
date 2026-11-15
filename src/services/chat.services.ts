@@ -38,16 +38,19 @@ import { findMessagesByConversationId } from "../repository/message.repository.j
 import {
   formatTavilyResultsForPrompt,
   searchWeb,
-  type TavilySearchResponse,
+  type TavilySearchResult,
 } from "../lib/tavily.js";
-import { NotFoundError, ValidationError } from "../types/app-error.js";
+import {
+  AppError,
+  NotFoundError,
+  ValidationError,
+} from "../types/app-error.js";
 import {
   buildConversationTitle,
   getLastUserMessageText,
   getTextFromUIMessage,
 } from "../utils/chat-message.js";
 import { getWorkspaceByIdForUser } from "./workspace.services.js";
-import { searchUserMemories } from "../lib/mem0.js";
 
 /**
  * Lists all conversations in a workspace for the sidebar/history UI.
@@ -219,9 +222,9 @@ async function resolveConversation(
  * **Pipeline:**
  * 1. Validate user message and resolve/create conversation
  * 2. Save user message to Postgres
- * 3. Parallel: Pinecone RAG retrieval + Mem0 memory search
+ * 3. Retrieve active-workspace source context
  * 4. Build system prompt and stream model response via AI SDK
- * 5. On finish: save assistant message, citations, title, summary job, Mem0 learning
+ * 5. On finish: save assistant message, citations and a conversation summary job
  *
  * @param res - Express response (streamed via `pipeUIMessageStreamToResponse`)
  * @param workspaceId - Workspace whose sources to search
@@ -233,6 +236,7 @@ async function resolveConversation(
  *
  *
  */
+export const webSearchProvider = { search: searchWeb };
 export const chatModelProvider = { get: (model: string) => openai(model) };
 
 export async function streamWorkspaceChat(
@@ -250,8 +254,14 @@ export async function streamWorkspaceChat(
   const requestedModel = input.model ?? workspace.defaultModel;
   const chatModel =
     CHAT_MODELS.find((model) => model === requestedModel) ?? CHAT_MODEL;
-  const webSearchEnabled =
-    input.webSearch === true && !!process.env.TAVILY_API_KEY?.trim();
+  const webSearchEnabled = input.webSearch === true;
+  if (webSearchEnabled && !process.env.TAVILY_API_KEY?.trim())
+    throw new AppError(
+      503,
+      "Web search is unavailable. Disable search or try again later.",
+      undefined,
+      "WEB_SEARCH_UNAVAILABLE",
+    );
 
   const userText = getLastUserMessageText(input.messages);
   if (!userText) {
@@ -279,15 +289,10 @@ export async function streamWorkspaceChat(
     });
   });
 
-  const [retrievedChunks, userMemories] = await Promise.all([
-    retrieveWorkspaceContext(workspaceId, userText),
-    searchUserMemories(userId, userText).catch(() => {
-      console.error("Personal memory search unavailable");
-      return [];
-    }),
-  ]);
+  const retrievedChunks = await retrieveWorkspaceContext(workspaceId, userText);
 
-  const citations = retrievedChunks.map((chunk) => ({
+  const citations = retrievedChunks.map((chunk, index) => ({
+    label: String(index + 1),
     sourceId: chunk.sourceId,
     sourceTitle: chunk.sourceTitle,
     sourceType: chunk.sourceType,
@@ -300,7 +305,6 @@ export async function streamWorkspaceChat(
   const systemPrompt = buildChatSystemPrompt({
     chunks: retrievedChunks,
     conversationSummary: conversation.summary,
-    userMemories: userMemories.map((memory) => memory.memory),
     webSearchEnabled,
   });
 
@@ -322,7 +326,7 @@ export async function streamWorkspaceChat(
   res.once("close", disconnect);
   res.socket?.once("close", disconnect);
 
-  let webSearchResults: TavilySearchResponse | null = null;
+  const webSearchResults: (TavilySearchResult & { label: string })[] = [];
 
   const stream = createUIMessageStream({
     originalMessages: input.messages,
@@ -342,9 +346,15 @@ export async function streamWorkspaceChat(
                   .describe("The search query for current web information"),
               }),
               execute: async ({ query }) => {
-                const results = await searchWeb(query);
-                webSearchResults = results;
-                return formatTavilyResultsForPrompt(results);
+                const results = await webSearchProvider.search(query);
+                const offset = webSearchResults.length;
+                webSearchResults.push(
+                  ...results.results.map((result, index) => ({
+                    ...result,
+                    label: `W${offset + index + 1}`,
+                  })),
+                );
+                return formatTavilyResultsForPrompt(results, offset);
               },
             }),
           }
@@ -375,14 +385,13 @@ export async function streamWorkspaceChat(
         return;
       }
 
-      const webCitations = webSearchResults
-        ? webSearchResults.results.map((result) => ({
-            sourceType: "WEB" as const,
-            sourceTitle: result.title,
-            url: result.url,
-            excerpt: result.content.slice(0, 280),
-          }))
-        : [];
+      const webCitations = webSearchResults.map((result) => ({
+        label: result.label,
+        sourceType: "WEB" as const,
+        sourceTitle: result.title,
+        url: result.url,
+        excerpt: result.content.slice(0, 280),
+      }));
       const allCitations = [...citations, ...webCitations];
 
       const jobs = await workspaceTransaction(workspaceId, async (tx) => {
@@ -412,18 +421,7 @@ export async function streamWorkspaceChat(
               dedupeKey: `summary:${conversation.id}:${assistant.position}`,
             }),
           );
-        if (process.env.MEM0_API_KEY?.trim()) {
-          pending.push(
-            await createJob(tx, {
-              type: "MEMORY",
-              resourceId: conversation.id,
-              ownerId: userId,
-              workspaceId,
-              dedupeKey: `memory:${assistant.id}`,
-              payload: { messageIds: [savedUser.id, assistant.id] },
-            }),
-          );
-        }
+
         return pending;
       });
       for (const job of jobs) kickJob(job.id);

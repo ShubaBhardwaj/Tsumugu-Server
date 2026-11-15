@@ -15,6 +15,7 @@ import {
 } from "./artifact-generation.services.js";
 import { getWorkspaceByIdForUser } from "./workspace.services.js";
 import type { CreateArtifactInput } from "../validators/artifact.validator.js";
+import { artifactOptionsSchema } from "../validators/artifact.validator.js";
 import { kickJob, retryJobForUser, type JobContext } from "./job.services.js";
 export async function listArtifactsForWorkspace(
   workspaceId: string,
@@ -57,6 +58,7 @@ export async function createArtifactForWorkspace(
         type: input.type,
         title: input.title || input.type,
         sourceIds: input.sourceIds ?? context.selectedSourceIds,
+        options: input.options,
       },
     });
     const job = await createJob(tx, {
@@ -117,9 +119,13 @@ export async function processArtifactJob(ctx: JobContext) {
     artifact.sourceIds,
   );
   await ctx.check();
+  const options = artifact.options
+    ? artifactOptionsSchema.parse(artifact.options)
+    : undefined;
   const content = validateArtifactContent(
     artifact.type,
-    await artifactGenerator.generate(artifact.type, context.text),
+    await artifactGenerator.generate(artifact.type, context.text, options),
+    options,
   );
   await ctx.commit(async (tx) => {
     const valid = await tx.source.count({

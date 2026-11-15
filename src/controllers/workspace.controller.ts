@@ -5,6 +5,7 @@ import {
   getWorkspaceByIdForUser,
   listWorkspacesByUser,
   updateWorkspaceForUser,
+  resolveMobileWorkspace,
 } from "../services/workspace.services.js";
 import { ValidationError } from "../types/app-error.js";
 import { getZodFieldErrors } from "../utils/zod-error.js";
@@ -69,6 +70,11 @@ export async function getWorkspace(req: Request, res: Response) {
 
 export async function createWorkspace(req: Request, res: Response) {
   const input = parseCreateBody(req.body);
+  if (input.clientCollectionKey) {
+    const result = await resolveMobileWorkspace(req.session.user.id, input);
+    res.status(result.created ? 201 : 200).json(result.workspace);
+    return;
+  }
   const workspace = await createWorkspaceForUser(req.session.user.id, input);
   res.status(201).json(workspace);
 }

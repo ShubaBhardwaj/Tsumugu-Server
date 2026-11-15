@@ -236,6 +236,7 @@ export type SourceWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Source"> | Date | string
   workspace?: Prisma.XOR<Prisma.WorkspaceScalarRelationFilter, Prisma.WorkspaceWhereInput>
   chunks?: Prisma.SourceChunkListRelationFilter
+  mobileBinding?: Prisma.XOR<Prisma.MobileSourceBindingNullableScalarRelationFilter, Prisma.MobileSourceBindingWhereInput> | null
 }
 
 export type SourceOrderByWithRelationInput = {
@@ -253,6 +254,7 @@ export type SourceOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   workspace?: Prisma.WorkspaceOrderByWithRelationInput
   chunks?: Prisma.SourceChunkOrderByRelationAggregateInput
+  mobileBinding?: Prisma.MobileSourceBindingOrderByWithRelationInput
 }
 
 export type SourceWhereUniqueInput = Prisma.AtLeast<{
@@ -273,6 +275,7 @@ export type SourceWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Source"> | Date | string
   workspace?: Prisma.XOR<Prisma.WorkspaceScalarRelationFilter, Prisma.WorkspaceWhereInput>
   chunks?: Prisma.SourceChunkListRelationFilter
+  mobileBinding?: Prisma.XOR<Prisma.MobileSourceBindingNullableScalarRelationFilter, Prisma.MobileSourceBindingWhereInput> | null
 }, "id">
 
 export type SourceOrderByWithAggregationInput = {
@@ -325,6 +328,7 @@ export type SourceCreateInput = {
   updatedAt?: Date | string
   workspace: Prisma.WorkspaceCreateNestedOneWithoutSourcesInput
   chunks?: Prisma.SourceChunkCreateNestedManyWithoutSourceInput
+  mobileBinding?: Prisma.MobileSourceBindingCreateNestedOneWithoutSourceInput
 }
 
 export type SourceUncheckedCreateInput = {
@@ -341,6 +345,7 @@ export type SourceUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   chunks?: Prisma.SourceChunkUncheckedCreateNestedManyWithoutSourceInput
+  mobileBinding?: Prisma.MobileSourceBindingUncheckedCreateNestedOneWithoutSourceInput
 }
 
 export type SourceUpdateInput = {
@@ -357,6 +362,7 @@ export type SourceUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   workspace?: Prisma.WorkspaceUpdateOneRequiredWithoutSourcesNestedInput
   chunks?: Prisma.SourceChunkUpdateManyWithoutSourceNestedInput
+  mobileBinding?: Prisma.MobileSourceBindingUpdateOneWithoutSourceNestedInput
 }
 
 export type SourceUncheckedUpdateInput = {
@@ -373,6 +379,7 @@ export type SourceUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   chunks?: Prisma.SourceChunkUncheckedUpdateManyWithoutSourceNestedInput
+  mobileBinding?: Prisma.MobileSourceBindingUncheckedUpdateOneWithoutSourceNestedInput
 }
 
 export type SourceCreateManyInput = {
@@ -477,6 +484,11 @@ export type SourceScalarRelationFilter = {
   isNot?: Prisma.SourceWhereInput
 }
 
+export type SourceNullableScalarRelationFilter = {
+  is?: Prisma.SourceWhereInput | null
+  isNot?: Prisma.SourceWhereInput | null
+}
+
 export type SourceCreateNestedManyWithoutWorkspaceInput = {
   create?: Prisma.XOR<Prisma.SourceCreateWithoutWorkspaceInput, Prisma.SourceUncheckedCreateWithoutWorkspaceInput> | Prisma.SourceCreateWithoutWorkspaceInput[] | Prisma.SourceUncheckedCreateWithoutWorkspaceInput[]
   connectOrCreate?: Prisma.SourceCreateOrConnectWithoutWorkspaceInput | Prisma.SourceCreateOrConnectWithoutWorkspaceInput[]
@@ -541,6 +553,22 @@ export type SourceUpdateOneRequiredWithoutChunksNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.SourceUpdateToOneWithWhereWithoutChunksInput, Prisma.SourceUpdateWithoutChunksInput>, Prisma.SourceUncheckedUpdateWithoutChunksInput>
 }
 
+export type SourceCreateNestedOneWithoutMobileBindingInput = {
+  create?: Prisma.XOR<Prisma.SourceCreateWithoutMobileBindingInput, Prisma.SourceUncheckedCreateWithoutMobileBindingInput>
+  connectOrCreate?: Prisma.SourceCreateOrConnectWithoutMobileBindingInput
+  connect?: Prisma.SourceWhereUniqueInput
+}
+
+export type SourceUpdateOneWithoutMobileBindingNestedInput = {
+  create?: Prisma.XOR<Prisma.SourceCreateWithoutMobileBindingInput, Prisma.SourceUncheckedCreateWithoutMobileBindingInput>
+  connectOrCreate?: Prisma.SourceCreateOrConnectWithoutMobileBindingInput
+  upsert?: Prisma.SourceUpsertWithoutMobileBindingInput
+  disconnect?: Prisma.SourceWhereInput | boolean
+  delete?: Prisma.SourceWhereInput | boolean
+  connect?: Prisma.SourceWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.SourceUpdateToOneWithWhereWithoutMobileBindingInput, Prisma.SourceUpdateWithoutMobileBindingInput>, Prisma.SourceUncheckedUpdateWithoutMobileBindingInput>
+}
+
 export type SourceCreateWithoutWorkspaceInput = {
   id?: string
   type: $Enums.SourceType
@@ -554,6 +582,7 @@ export type SourceCreateWithoutWorkspaceInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   chunks?: Prisma.SourceChunkCreateNestedManyWithoutSourceInput
+  mobileBinding?: Prisma.MobileSourceBindingCreateNestedOneWithoutSourceInput
 }
 
 export type SourceUncheckedCreateWithoutWorkspaceInput = {
@@ -569,6 +598,7 @@ export type SourceUncheckedCreateWithoutWorkspaceInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   chunks?: Prisma.SourceChunkUncheckedCreateNestedManyWithoutSourceInput
+  mobileBinding?: Prisma.MobileSourceBindingUncheckedCreateNestedOneWithoutSourceInput
 }
 
 export type SourceCreateOrConnectWithoutWorkspaceInput = {
@@ -628,6 +658,7 @@ export type SourceCreateWithoutChunksInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   workspace: Prisma.WorkspaceCreateNestedOneWithoutSourcesInput
+  mobileBinding?: Prisma.MobileSourceBindingCreateNestedOneWithoutSourceInput
 }
 
 export type SourceUncheckedCreateWithoutChunksInput = {
@@ -643,6 +674,7 @@ export type SourceUncheckedCreateWithoutChunksInput = {
   jobId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mobileBinding?: Prisma.MobileSourceBindingUncheckedCreateNestedOneWithoutSourceInput
 }
 
 export type SourceCreateOrConnectWithoutChunksInput = {
@@ -674,6 +706,7 @@ export type SourceUpdateWithoutChunksInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   workspace?: Prisma.WorkspaceUpdateOneRequiredWithoutSourcesNestedInput
+  mobileBinding?: Prisma.MobileSourceBindingUpdateOneWithoutSourceNestedInput
 }
 
 export type SourceUncheckedUpdateWithoutChunksInput = {
@@ -689,6 +722,87 @@ export type SourceUncheckedUpdateWithoutChunksInput = {
   jobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mobileBinding?: Prisma.MobileSourceBindingUncheckedUpdateOneWithoutSourceNestedInput
+}
+
+export type SourceCreateWithoutMobileBindingInput = {
+  id?: string
+  type: $Enums.SourceType
+  title: string
+  content?: string | null
+  url?: string | null
+  status?: $Enums.SourceStatus
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
+  jobId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  workspace: Prisma.WorkspaceCreateNestedOneWithoutSourcesInput
+  chunks?: Prisma.SourceChunkCreateNestedManyWithoutSourceInput
+}
+
+export type SourceUncheckedCreateWithoutMobileBindingInput = {
+  id?: string
+  workspaceId: string
+  type: $Enums.SourceType
+  title: string
+  content?: string | null
+  url?: string | null
+  status?: $Enums.SourceStatus
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
+  jobId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  chunks?: Prisma.SourceChunkUncheckedCreateNestedManyWithoutSourceInput
+}
+
+export type SourceCreateOrConnectWithoutMobileBindingInput = {
+  where: Prisma.SourceWhereUniqueInput
+  create: Prisma.XOR<Prisma.SourceCreateWithoutMobileBindingInput, Prisma.SourceUncheckedCreateWithoutMobileBindingInput>
+}
+
+export type SourceUpsertWithoutMobileBindingInput = {
+  update: Prisma.XOR<Prisma.SourceUpdateWithoutMobileBindingInput, Prisma.SourceUncheckedUpdateWithoutMobileBindingInput>
+  create: Prisma.XOR<Prisma.SourceCreateWithoutMobileBindingInput, Prisma.SourceUncheckedCreateWithoutMobileBindingInput>
+  where?: Prisma.SourceWhereInput
+}
+
+export type SourceUpdateToOneWithWhereWithoutMobileBindingInput = {
+  where?: Prisma.SourceWhereInput
+  data: Prisma.XOR<Prisma.SourceUpdateWithoutMobileBindingInput, Prisma.SourceUncheckedUpdateWithoutMobileBindingInput>
+}
+
+export type SourceUpdateWithoutMobileBindingInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumSourceTypeFieldUpdateOperationsInput | $Enums.SourceType
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumSourceStatusFieldUpdateOperationsInput | $Enums.SourceStatus
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  jobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workspace?: Prisma.WorkspaceUpdateOneRequiredWithoutSourcesNestedInput
+  chunks?: Prisma.SourceChunkUpdateManyWithoutSourceNestedInput
+}
+
+export type SourceUncheckedUpdateWithoutMobileBindingInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  workspaceId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumSourceTypeFieldUpdateOperationsInput | $Enums.SourceType
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumSourceStatusFieldUpdateOperationsInput | $Enums.SourceStatus
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  jobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  chunks?: Prisma.SourceChunkUncheckedUpdateManyWithoutSourceNestedInput
 }
 
 export type SourceCreateManyWorkspaceInput = {
@@ -718,6 +832,7 @@ export type SourceUpdateWithoutWorkspaceInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   chunks?: Prisma.SourceChunkUpdateManyWithoutSourceNestedInput
+  mobileBinding?: Prisma.MobileSourceBindingUpdateOneWithoutSourceNestedInput
 }
 
 export type SourceUncheckedUpdateWithoutWorkspaceInput = {
@@ -733,6 +848,7 @@ export type SourceUncheckedUpdateWithoutWorkspaceInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   chunks?: Prisma.SourceChunkUncheckedUpdateManyWithoutSourceNestedInput
+  mobileBinding?: Prisma.MobileSourceBindingUncheckedUpdateOneWithoutSourceNestedInput
 }
 
 export type SourceUncheckedUpdateManyWithoutWorkspaceInput = {
@@ -795,6 +911,7 @@ export type SourceSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   updatedAt?: boolean
   workspace?: boolean | Prisma.WorkspaceDefaultArgs<ExtArgs>
   chunks?: boolean | Prisma.Source$chunksArgs<ExtArgs>
+  mobileBinding?: boolean | Prisma.Source$mobileBindingArgs<ExtArgs>
   _count?: boolean | Prisma.SourceCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["source"]>
 
@@ -849,6 +966,7 @@ export type SourceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
 export type SourceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   workspace?: boolean | Prisma.WorkspaceDefaultArgs<ExtArgs>
   chunks?: boolean | Prisma.Source$chunksArgs<ExtArgs>
+  mobileBinding?: boolean | Prisma.Source$mobileBindingArgs<ExtArgs>
   _count?: boolean | Prisma.SourceCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type SourceIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -863,6 +981,7 @@ export type $SourcePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
   objects: {
     workspace: Prisma.$WorkspacePayload<ExtArgs>
     chunks: Prisma.$SourceChunkPayload<ExtArgs>[]
+    mobileBinding: Prisma.$MobileSourceBindingPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1273,6 +1392,7 @@ export interface Prisma__SourceClient<T, Null = never, ExtArgs extends runtime.T
   readonly [Symbol.toStringTag]: "PrismaPromise"
   workspace<T extends Prisma.WorkspaceDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WorkspaceDefaultArgs<ExtArgs>>): Prisma.Prisma__WorkspaceClient<runtime.Types.Result.GetResult<Prisma.$WorkspacePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   chunks<T extends Prisma.Source$chunksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Source$chunksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SourceChunkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  mobileBinding<T extends Prisma.Source$mobileBindingArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Source$mobileBindingArgs<ExtArgs>>): Prisma.Prisma__MobileSourceBindingClient<runtime.Types.Result.GetResult<Prisma.$MobileSourceBindingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1736,6 +1856,25 @@ export type Source$chunksArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.SourceChunkScalarFieldEnum | Prisma.SourceChunkScalarFieldEnum[]
+}
+
+/**
+ * Source.mobileBinding
+ */
+export type Source$mobileBindingArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MobileSourceBinding
+   */
+  select?: Prisma.MobileSourceBindingSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MobileSourceBinding
+   */
+  omit?: Prisma.MobileSourceBindingOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MobileSourceBindingInclude<ExtArgs> | null
+  where?: Prisma.MobileSourceBindingWhereInput
 }
 
 /**

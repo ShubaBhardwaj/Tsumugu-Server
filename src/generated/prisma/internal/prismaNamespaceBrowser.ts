@@ -61,6 +61,9 @@ export const ModelName = {
   Conversation: 'Conversation',
   Message: 'Message',
   LearningArtifact: 'LearningArtifact',
+  MobileWorkspaceBinding: 'MobileWorkspaceBinding',
+  MobileSourceBinding: 'MobileSourceBinding',
+  ClientSubmission: 'ClientSubmission',
   BackgroundJob: 'BackgroundJob'
 } as const
 
@@ -221,12 +224,64 @@ export const LearningArtifactScalarFieldEnum = {
   sourceIds: 'sourceIds',
   status: 'status',
   metadata: 'metadata',
+  options: 'options',
   jobId: 'jobId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type LearningArtifactScalarFieldEnum = (typeof LearningArtifactScalarFieldEnum)[keyof typeof LearningArtifactScalarFieldEnum]
+
+
+export const MobileWorkspaceBindingScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  clientCollectionKey: 'clientCollectionKey',
+  workspaceId: 'workspaceId',
+  deletedAt: 'deletedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MobileWorkspaceBindingScalarFieldEnum = (typeof MobileWorkspaceBindingScalarFieldEnum)[keyof typeof MobileWorkspaceBindingScalarFieldEnum]
+
+
+export const MobileSourceBindingScalarFieldEnum = {
+  id: 'id',
+  workspaceId: 'workspaceId',
+  clientItemKey: 'clientItemKey',
+  sourceId: 'sourceId',
+  contentRevision: 'contentRevision',
+  deletedAt: 'deletedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MobileSourceBindingScalarFieldEnum = (typeof MobileSourceBindingScalarFieldEnum)[keyof typeof MobileSourceBindingScalarFieldEnum]
+
+
+export const ClientSubmissionScalarFieldEnum = {
+  id: 'id',
+  ownerId: 'ownerId',
+  idempotencyKey: 'idempotencyKey',
+  operation: 'operation',
+  inputDigest: 'inputDigest',
+  workspaceId: 'workspaceId',
+  clientItemKey: 'clientItemKey',
+  sourceId: 'sourceId',
+  sourceBindingId: 'sourceBindingId',
+  status: 'status',
+  result: 'result',
+  responseStatus: 'responseStatus',
+  errorCode: 'errorCode',
+  leaseUntil: 'leaseUntil',
+  deadline: 'deadline',
+  representationTarget: 'representationTarget',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ClientSubmissionScalarFieldEnum = (typeof ClientSubmissionScalarFieldEnum)[keyof typeof ClientSubmissionScalarFieldEnum]
 
 
 export const BackgroundJobScalarFieldEnum = {

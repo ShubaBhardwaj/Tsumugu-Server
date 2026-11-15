@@ -407,6 +407,9 @@ export const ModelName = {
   Conversation: 'Conversation',
   Message: 'Message',
   LearningArtifact: 'LearningArtifact',
+  MobileWorkspaceBinding: 'MobileWorkspaceBinding',
+  MobileSourceBinding: 'MobileSourceBinding',
+  ClientSubmission: 'ClientSubmission',
   BackgroundJob: 'BackgroundJob'
 } as const
 
@@ -423,7 +426,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "verification" | "workspace" | "source" | "sourceChunk" | "conversation" | "message" | "learningArtifact" | "backgroundJob"
+    modelProps: "user" | "session" | "account" | "verification" | "workspace" | "source" | "sourceChunk" | "conversation" | "message" | "learningArtifact" | "mobileWorkspaceBinding" | "mobileSourceBinding" | "clientSubmission" | "backgroundJob"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1167,6 +1170,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    MobileWorkspaceBinding: {
+      payload: Prisma.$MobileWorkspaceBindingPayload<ExtArgs>
+      fields: Prisma.MobileWorkspaceBindingFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MobileWorkspaceBindingFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobileWorkspaceBindingPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MobileWorkspaceBindingFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobileWorkspaceBindingPayload>
+        }
+        findFirst: {
+          args: Prisma.MobileWorkspaceBindingFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobileWorkspaceBindingPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MobileWorkspaceBindingFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobileWorkspaceBindingPayload>
+        }
+        findMany: {
+          args: Prisma.MobileWorkspaceBindingFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobileWorkspaceBindingPayload>[]
+        }
+        create: {
+          args: Prisma.MobileWorkspaceBindingCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobileWorkspaceBindingPayload>
+        }
+        createMany: {
+          args: Prisma.MobileWorkspaceBindingCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MobileWorkspaceBindingCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobileWorkspaceBindingPayload>[]
+        }
+        delete: {
+          args: Prisma.MobileWorkspaceBindingDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobileWorkspaceBindingPayload>
+        }
+        update: {
+          args: Prisma.MobileWorkspaceBindingUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobileWorkspaceBindingPayload>
+        }
+        deleteMany: {
+          args: Prisma.MobileWorkspaceBindingDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MobileWorkspaceBindingUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MobileWorkspaceBindingUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobileWorkspaceBindingPayload>[]
+        }
+        upsert: {
+          args: Prisma.MobileWorkspaceBindingUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobileWorkspaceBindingPayload>
+        }
+        aggregate: {
+          args: Prisma.MobileWorkspaceBindingAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMobileWorkspaceBinding>
+        }
+        groupBy: {
+          args: Prisma.MobileWorkspaceBindingGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MobileWorkspaceBindingGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MobileWorkspaceBindingCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MobileWorkspaceBindingCountAggregateOutputType> | number
+        }
+      }
+    }
+    MobileSourceBinding: {
+      payload: Prisma.$MobileSourceBindingPayload<ExtArgs>
+      fields: Prisma.MobileSourceBindingFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MobileSourceBindingFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobileSourceBindingPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MobileSourceBindingFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobileSourceBindingPayload>
+        }
+        findFirst: {
+          args: Prisma.MobileSourceBindingFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobileSourceBindingPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MobileSourceBindingFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobileSourceBindingPayload>
+        }
+        findMany: {
+          args: Prisma.MobileSourceBindingFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobileSourceBindingPayload>[]
+        }
+        create: {
+          args: Prisma.MobileSourceBindingCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobileSourceBindingPayload>
+        }
+        createMany: {
+          args: Prisma.MobileSourceBindingCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MobileSourceBindingCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobileSourceBindingPayload>[]
+        }
+        delete: {
+          args: Prisma.MobileSourceBindingDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobileSourceBindingPayload>
+        }
+        update: {
+          args: Prisma.MobileSourceBindingUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobileSourceBindingPayload>
+        }
+        deleteMany: {
+          args: Prisma.MobileSourceBindingDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MobileSourceBindingUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MobileSourceBindingUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobileSourceBindingPayload>[]
+        }
+        upsert: {
+          args: Prisma.MobileSourceBindingUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobileSourceBindingPayload>
+        }
+        aggregate: {
+          args: Prisma.MobileSourceBindingAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMobileSourceBinding>
+        }
+        groupBy: {
+          args: Prisma.MobileSourceBindingGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MobileSourceBindingGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MobileSourceBindingCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MobileSourceBindingCountAggregateOutputType> | number
+        }
+      }
+    }
+    ClientSubmission: {
+      payload: Prisma.$ClientSubmissionPayload<ExtArgs>
+      fields: Prisma.ClientSubmissionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ClientSubmissionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientSubmissionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ClientSubmissionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientSubmissionPayload>
+        }
+        findFirst: {
+          args: Prisma.ClientSubmissionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientSubmissionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ClientSubmissionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientSubmissionPayload>
+        }
+        findMany: {
+          args: Prisma.ClientSubmissionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientSubmissionPayload>[]
+        }
+        create: {
+          args: Prisma.ClientSubmissionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientSubmissionPayload>
+        }
+        createMany: {
+          args: Prisma.ClientSubmissionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ClientSubmissionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientSubmissionPayload>[]
+        }
+        delete: {
+          args: Prisma.ClientSubmissionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientSubmissionPayload>
+        }
+        update: {
+          args: Prisma.ClientSubmissionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientSubmissionPayload>
+        }
+        deleteMany: {
+          args: Prisma.ClientSubmissionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ClientSubmissionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ClientSubmissionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientSubmissionPayload>[]
+        }
+        upsert: {
+          args: Prisma.ClientSubmissionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientSubmissionPayload>
+        }
+        aggregate: {
+          args: Prisma.ClientSubmissionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateClientSubmission>
+        }
+        groupBy: {
+          args: Prisma.ClientSubmissionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ClientSubmissionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ClientSubmissionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ClientSubmissionCountAggregateOutputType> | number
+        }
+      }
+    }
     BackgroundJob: {
       payload: Prisma.$BackgroundJobPayload<ExtArgs>
       fields: Prisma.BackgroundJobFieldRefs
@@ -1421,12 +1646,64 @@ export const LearningArtifactScalarFieldEnum = {
   sourceIds: 'sourceIds',
   status: 'status',
   metadata: 'metadata',
+  options: 'options',
   jobId: 'jobId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type LearningArtifactScalarFieldEnum = (typeof LearningArtifactScalarFieldEnum)[keyof typeof LearningArtifactScalarFieldEnum]
+
+
+export const MobileWorkspaceBindingScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  clientCollectionKey: 'clientCollectionKey',
+  workspaceId: 'workspaceId',
+  deletedAt: 'deletedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MobileWorkspaceBindingScalarFieldEnum = (typeof MobileWorkspaceBindingScalarFieldEnum)[keyof typeof MobileWorkspaceBindingScalarFieldEnum]
+
+
+export const MobileSourceBindingScalarFieldEnum = {
+  id: 'id',
+  workspaceId: 'workspaceId',
+  clientItemKey: 'clientItemKey',
+  sourceId: 'sourceId',
+  contentRevision: 'contentRevision',
+  deletedAt: 'deletedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MobileSourceBindingScalarFieldEnum = (typeof MobileSourceBindingScalarFieldEnum)[keyof typeof MobileSourceBindingScalarFieldEnum]
+
+
+export const ClientSubmissionScalarFieldEnum = {
+  id: 'id',
+  ownerId: 'ownerId',
+  idempotencyKey: 'idempotencyKey',
+  operation: 'operation',
+  inputDigest: 'inputDigest',
+  workspaceId: 'workspaceId',
+  clientItemKey: 'clientItemKey',
+  sourceId: 'sourceId',
+  sourceBindingId: 'sourceBindingId',
+  status: 'status',
+  result: 'result',
+  responseStatus: 'responseStatus',
+  errorCode: 'errorCode',
+  leaseUntil: 'leaseUntil',
+  deadline: 'deadline',
+  representationTarget: 'representationTarget',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ClientSubmissionScalarFieldEnum = (typeof ClientSubmissionScalarFieldEnum)[keyof typeof ClientSubmissionScalarFieldEnum]
 
 
 export const BackgroundJobScalarFieldEnum = {
@@ -1640,6 +1917,20 @@ export type ListEnumArtifactStatusFieldRefInput<$PrismaModel> = FieldRefInputTyp
 
 
 /**
+ * Reference to a field of type 'SubmissionStatus'
+ */
+export type EnumSubmissionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SubmissionStatus'>
+
+
+
+/**
+ * Reference to a field of type 'SubmissionStatus[]'
+ */
+export type ListEnumSubmissionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SubmissionStatus[]'>
+
+
+
+/**
  * Reference to a field of type 'JobType'
  */
 export type EnumJobTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'JobType'>
@@ -1841,6 +2132,9 @@ export type GlobalOmitConfig = {
   conversation?: Prisma.ConversationOmit
   message?: Prisma.MessageOmit
   learningArtifact?: Prisma.LearningArtifactOmit
+  mobileWorkspaceBinding?: Prisma.MobileWorkspaceBindingOmit
+  mobileSourceBinding?: Prisma.MobileSourceBindingOmit
+  clientSubmission?: Prisma.ClientSubmissionOmit
   backgroundJob?: Prisma.BackgroundJobOmit
 }
 

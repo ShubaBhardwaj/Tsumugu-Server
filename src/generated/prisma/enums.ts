@@ -78,7 +78,17 @@ export const JobType = {
   SUMMARY: 'SUMMARY',
   MEMORY: 'MEMORY',
   SOURCE_CLEANUP: 'SOURCE_CLEANUP',
-  WORKSPACE_CLEANUP: 'WORKSPACE_CLEANUP'
+  WORKSPACE_CLEANUP: 'WORKSPACE_CLEANUP',
+  REPRESENTATION_CLEANUP: 'REPRESENTATION_CLEANUP'
 } as const
 
 export type JobType = (typeof JobType)[keyof typeof JobType]
+
+
+export const SubmissionStatus = {
+  PENDING: 'PENDING',
+  COMMITTED: 'COMMITTED',
+  FAILED: 'FAILED'
+} as const
+
+export type SubmissionStatus = (typeof SubmissionStatus)[keyof typeof SubmissionStatus]

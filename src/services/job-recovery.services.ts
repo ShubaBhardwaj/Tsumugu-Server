@@ -5,6 +5,13 @@ import {
 } from "../repository/job.repository.js";
 import { recoverJobs } from "./job.services.js";
 export async function reconcileLegacyJobs() {
+  await prisma.backgroundJob.updateMany({
+    where: {
+      type: "MEMORY",
+      status: { in: ["PENDING", "DISPATCHED", "RUNNING"] },
+    },
+    data: { status: "CANCELLED" },
+  });
   const workspaces = await prisma.workspace.findMany({
     where: { deletedAt: null },
     select: { id: true, userId: true },

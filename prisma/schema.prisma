@@ -8,16 +8,18 @@ datasource db {
 }
 
 model User {
-  id            String      @id
-  name          String
-  email         String
-  emailVerified Boolean     @default(false)
-  image         String?
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  sessions      Session[]
-  accounts      Account[]
-  workspaces    Workspace[]
+  id                      String                   @id
+  name                    String
+  email                   String
+  emailVerified           Boolean                  @default(false)
+  image                   String?
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  sessions                Session[]
+  accounts                Account[]
+  workspaces              Workspace[]
+  mobileWorkspaceBindings MobileWorkspaceBinding[]
+  clientSubmissions       ClientSubmission[]
 
   @@unique([email])
   @@map("user")
@@ -72,19 +74,21 @@ model Verification {
 }
 
 model Workspace {
-  id            String             @id @default(cuid())
-  userId        String
-  title         String
-  description   String?
-  icon          String?
-  defaultModel  String             @default("gpt-4o-mini")
-  deletedAt     DateTime?
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @updatedAt
-  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  sources       Source[]
-  conversations Conversation[]
-  artifacts     LearningArtifact[]
+  id                   String                  @id @default(cuid())
+  userId               String
+  title                String
+  description          String?
+  icon                 String?
+  defaultModel         String                  @default("gpt-4o-mini")
+  deletedAt            DateTime?
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime                @updatedAt
+  user                 User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sources              Source[]
+  conversations        Conversation[]
+  artifacts            LearningArtifact[]
+  mobileBinding        MobileWorkspaceBinding?
+  mobileSourceBindings MobileSourceBinding[]
 
   @@index([userId])
   @@map("workspace")
@@ -106,20 +110,21 @@ enum SourceStatus {
 }
 
 model Source {
-  id          String        @id @default(cuid())
-  workspaceId String
-  type        SourceType
-  title       String
-  content     String?
-  url         String?
-  status      SourceStatus  @default(PENDING)
-  metadata    Json?
-  deletedAt   DateTime?
-  jobId       String?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  chunks      SourceChunk[]
+  id            String               @id @default(cuid())
+  workspaceId   String
+  type          SourceType
+  title         String
+  content       String?
+  url           String?
+  status        SourceStatus         @default(PENDING)
+  metadata      Json?
+  deletedAt     DateTime?
+  jobId         String?
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  workspace     Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  chunks        SourceChunk[]
+  mobileBinding MobileSourceBinding?
 
   @@index([workspaceId])
   @@index([workspaceId, type])
@@ -175,9 +180,9 @@ model Message {
   createdAt      DateTime     @default(now())
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
+  @@unique([conversationId, position])
   @@index([conversationId])
   @@index([conversationId, createdAt])
-  @@unique([conversationId, position])
   @@map("message")
 }
 
@@ -206,6 +211,7 @@ model LearningArtifact {
   sourceIds   String[]
   status      ArtifactStatus @default(PENDING)
   metadata    Json?
+  options     Json?
   jobId       String?
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
@@ -233,6 +239,72 @@ enum JobType {
   MEMORY
   SOURCE_CLEANUP
   WORKSPACE_CLEANUP
+  REPRESENTATION_CLEANUP
+}
+
+model MobileWorkspaceBinding {
+  id                  String     @id @default(cuid())
+  userId              String
+  clientCollectionKey String
+  workspaceId         String?    @unique
+  deletedAt           DateTime?
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+  user                User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace           Workspace? @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, clientCollectionKey])
+  @@map("mobile_workspace_binding")
+}
+
+model MobileSourceBinding {
+  id              String    @id @default(cuid())
+  workspaceId     String
+  clientItemKey   String
+  sourceId        String?   @unique
+  contentRevision String
+  deletedAt       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  source          Source?   @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+
+  @@unique([workspaceId, clientItemKey])
+  @@map("mobile_source_binding")
+}
+
+enum SubmissionStatus {
+  PENDING
+  COMMITTED
+  FAILED
+}
+
+// Keeps replay/deletion evidence independently of resource cleanup; never stores file bytes.
+model ClientSubmission {
+  id                   String           @id @default(cuid())
+  ownerId              String
+  idempotencyKey       String
+  operation            String
+  inputDigest          String
+  workspaceId          String
+  clientItemKey        String
+  sourceId             String?
+  sourceBindingId      String?
+  status               SubmissionStatus @default(PENDING)
+  result               Json?
+  responseStatus       Int?
+  errorCode            String?
+  leaseUntil           DateTime
+  deadline             DateTime
+  representationTarget String?
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+  owner                User             @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@unique([ownerId, idempotencyKey])
+  @@index([status, deadline])
+  @@index([workspaceId, clientItemKey, status])
+  @@map("client_submission")
 }
 
 // No cascading parent foreign key: cleanup must survive removal of the resource.

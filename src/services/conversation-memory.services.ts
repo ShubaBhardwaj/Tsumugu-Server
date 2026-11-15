@@ -96,30 +96,7 @@ export async function summarizeConversationJob(ctx: JobContext) {
     );
   }
 }
-export async function learnConversationJob(ctx: JobContext) {
-  if (!process.env.MEM0_API_KEY?.trim()) return;
-  const payload = ctx.job.payload as { messageIds?: string[] };
-  const conversation = await prisma.conversation.findFirst({
-    where: {
-      id: ctx.job.resourceId,
-      workspace: { deletedAt: null, userId: ctx.job.ownerId },
-    },
-  });
-  if (!conversation) throw new CancelledJob();
-  const messages = await prisma.message.findMany({
-    where: {
-      conversationId: conversation.id,
-      id: { in: payload.messageIds ?? [] },
-    },
-    orderBy: { position: "asc" },
-  });
-  await ctx.check();
-  await memoryLearning.add(
-    ctx.job.ownerId,
-    messages.map((m) => ({
-      role: m.role === "USER" ? "user" : "assistant",
-      content: m.content,
-    })),
-    { source: "learned", conversationId: conversation.id },
-  );
+// Legacy collection-memory jobs must never export study content to account-wide storage.
+export async function learnConversationJob(_ctx: JobContext) {
+  throw new CancelledJob();
 }

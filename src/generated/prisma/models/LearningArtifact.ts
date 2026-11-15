@@ -55,6 +55,7 @@ export type LearningArtifactCountAggregateOutputType = {
   sourceIds: number
   status: number
   metadata: number
+  options: number
   jobId: number
   createdAt: number
   updatedAt: number
@@ -93,6 +94,7 @@ export type LearningArtifactCountAggregateInputType = {
   sourceIds?: true
   status?: true
   metadata?: true
+  options?: true
   jobId?: true
   createdAt?: true
   updatedAt?: true
@@ -180,6 +182,7 @@ export type LearningArtifactGroupByOutputType = {
   sourceIds: string[]
   status: $Enums.ArtifactStatus
   metadata: runtime.JsonValue | null
+  options: runtime.JsonValue | null
   jobId: string | null
   createdAt: Date
   updatedAt: Date
@@ -215,6 +218,7 @@ export type LearningArtifactWhereInput = {
   sourceIds?: Prisma.StringNullableListFilter<"LearningArtifact">
   status?: Prisma.EnumArtifactStatusFilter<"LearningArtifact"> | $Enums.ArtifactStatus
   metadata?: Prisma.JsonNullableFilter<"LearningArtifact">
+  options?: Prisma.JsonNullableFilter<"LearningArtifact">
   jobId?: Prisma.StringNullableFilter<"LearningArtifact"> | string | null
   createdAt?: Prisma.DateTimeFilter<"LearningArtifact"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"LearningArtifact"> | Date | string
@@ -230,6 +234,7 @@ export type LearningArtifactOrderByWithRelationInput = {
   sourceIds?: Prisma.SortOrder
   status?: Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
+  options?: Prisma.SortOrderInput | Prisma.SortOrder
   jobId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -248,6 +253,7 @@ export type LearningArtifactWhereUniqueInput = Prisma.AtLeast<{
   sourceIds?: Prisma.StringNullableListFilter<"LearningArtifact">
   status?: Prisma.EnumArtifactStatusFilter<"LearningArtifact"> | $Enums.ArtifactStatus
   metadata?: Prisma.JsonNullableFilter<"LearningArtifact">
+  options?: Prisma.JsonNullableFilter<"LearningArtifact">
   jobId?: Prisma.StringNullableFilter<"LearningArtifact"> | string | null
   createdAt?: Prisma.DateTimeFilter<"LearningArtifact"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"LearningArtifact"> | Date | string
@@ -263,6 +269,7 @@ export type LearningArtifactOrderByWithAggregationInput = {
   sourceIds?: Prisma.SortOrder
   status?: Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
+  options?: Prisma.SortOrderInput | Prisma.SortOrder
   jobId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -283,6 +290,7 @@ export type LearningArtifactScalarWhereWithAggregatesInput = {
   sourceIds?: Prisma.StringNullableListFilter<"LearningArtifact">
   status?: Prisma.EnumArtifactStatusWithAggregatesFilter<"LearningArtifact"> | $Enums.ArtifactStatus
   metadata?: Prisma.JsonNullableWithAggregatesFilter<"LearningArtifact">
+  options?: Prisma.JsonNullableWithAggregatesFilter<"LearningArtifact">
   jobId?: Prisma.StringNullableWithAggregatesFilter<"LearningArtifact"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"LearningArtifact"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"LearningArtifact"> | Date | string
@@ -296,6 +304,7 @@ export type LearningArtifactCreateInput = {
   sourceIds?: Prisma.LearningArtifactCreatesourceIdsInput | string[]
   status?: $Enums.ArtifactStatus
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  options?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   jobId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -311,6 +320,7 @@ export type LearningArtifactUncheckedCreateInput = {
   sourceIds?: Prisma.LearningArtifactCreatesourceIdsInput | string[]
   status?: $Enums.ArtifactStatus
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  options?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   jobId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -324,6 +334,7 @@ export type LearningArtifactUpdateInput = {
   sourceIds?: Prisma.LearningArtifactUpdatesourceIdsInput | string[]
   status?: Prisma.EnumArtifactStatusFieldUpdateOperationsInput | $Enums.ArtifactStatus
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  options?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   jobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -339,6 +350,7 @@ export type LearningArtifactUncheckedUpdateInput = {
   sourceIds?: Prisma.LearningArtifactUpdatesourceIdsInput | string[]
   status?: Prisma.EnumArtifactStatusFieldUpdateOperationsInput | $Enums.ArtifactStatus
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  options?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   jobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -353,6 +365,7 @@ export type LearningArtifactCreateManyInput = {
   sourceIds?: Prisma.LearningArtifactCreatesourceIdsInput | string[]
   status?: $Enums.ArtifactStatus
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  options?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   jobId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -366,6 +379,7 @@ export type LearningArtifactUpdateManyMutationInput = {
   sourceIds?: Prisma.LearningArtifactUpdatesourceIdsInput | string[]
   status?: Prisma.EnumArtifactStatusFieldUpdateOperationsInput | $Enums.ArtifactStatus
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  options?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   jobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -380,6 +394,7 @@ export type LearningArtifactUncheckedUpdateManyInput = {
   sourceIds?: Prisma.LearningArtifactUpdatesourceIdsInput | string[]
   status?: Prisma.EnumArtifactStatusFieldUpdateOperationsInput | $Enums.ArtifactStatus
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  options?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   jobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -412,6 +427,7 @@ export type LearningArtifactCountOrderByAggregateInput = {
   sourceIds?: Prisma.SortOrder
   status?: Prisma.SortOrder
   metadata?: Prisma.SortOrder
+  options?: Prisma.SortOrder
   jobId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -506,6 +522,7 @@ export type LearningArtifactCreateWithoutWorkspaceInput = {
   sourceIds?: Prisma.LearningArtifactCreatesourceIdsInput | string[]
   status?: $Enums.ArtifactStatus
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  options?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   jobId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -519,6 +536,7 @@ export type LearningArtifactUncheckedCreateWithoutWorkspaceInput = {
   sourceIds?: Prisma.LearningArtifactCreatesourceIdsInput | string[]
   status?: $Enums.ArtifactStatus
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  options?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   jobId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -562,6 +580,7 @@ export type LearningArtifactScalarWhereInput = {
   sourceIds?: Prisma.StringNullableListFilter<"LearningArtifact">
   status?: Prisma.EnumArtifactStatusFilter<"LearningArtifact"> | $Enums.ArtifactStatus
   metadata?: Prisma.JsonNullableFilter<"LearningArtifact">
+  options?: Prisma.JsonNullableFilter<"LearningArtifact">
   jobId?: Prisma.StringNullableFilter<"LearningArtifact"> | string | null
   createdAt?: Prisma.DateTimeFilter<"LearningArtifact"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"LearningArtifact"> | Date | string
@@ -575,6 +594,7 @@ export type LearningArtifactCreateManyWorkspaceInput = {
   sourceIds?: Prisma.LearningArtifactCreatesourceIdsInput | string[]
   status?: $Enums.ArtifactStatus
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  options?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   jobId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -588,6 +608,7 @@ export type LearningArtifactUpdateWithoutWorkspaceInput = {
   sourceIds?: Prisma.LearningArtifactUpdatesourceIdsInput | string[]
   status?: Prisma.EnumArtifactStatusFieldUpdateOperationsInput | $Enums.ArtifactStatus
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  options?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   jobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -601,6 +622,7 @@ export type LearningArtifactUncheckedUpdateWithoutWorkspaceInput = {
   sourceIds?: Prisma.LearningArtifactUpdatesourceIdsInput | string[]
   status?: Prisma.EnumArtifactStatusFieldUpdateOperationsInput | $Enums.ArtifactStatus
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  options?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   jobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -614,6 +636,7 @@ export type LearningArtifactUncheckedUpdateManyWithoutWorkspaceInput = {
   sourceIds?: Prisma.LearningArtifactUpdatesourceIdsInput | string[]
   status?: Prisma.EnumArtifactStatusFieldUpdateOperationsInput | $Enums.ArtifactStatus
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  options?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   jobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -630,6 +653,7 @@ export type LearningArtifactSelect<ExtArgs extends runtime.Types.Extensions.Inte
   sourceIds?: boolean
   status?: boolean
   metadata?: boolean
+  options?: boolean
   jobId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -645,6 +669,7 @@ export type LearningArtifactSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   sourceIds?: boolean
   status?: boolean
   metadata?: boolean
+  options?: boolean
   jobId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -660,6 +685,7 @@ export type LearningArtifactSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   sourceIds?: boolean
   status?: boolean
   metadata?: boolean
+  options?: boolean
   jobId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -675,12 +701,13 @@ export type LearningArtifactSelectScalar = {
   sourceIds?: boolean
   status?: boolean
   metadata?: boolean
+  options?: boolean
   jobId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type LearningArtifactOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "workspaceId" | "type" | "title" | "content" | "sourceIds" | "status" | "metadata" | "jobId" | "createdAt" | "updatedAt", ExtArgs["result"]["learningArtifact"]>
+export type LearningArtifactOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "workspaceId" | "type" | "title" | "content" | "sourceIds" | "status" | "metadata" | "options" | "jobId" | "createdAt" | "updatedAt", ExtArgs["result"]["learningArtifact"]>
 export type LearningArtifactInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   workspace?: boolean | Prisma.WorkspaceDefaultArgs<ExtArgs>
 }
@@ -705,6 +732,7 @@ export type $LearningArtifactPayload<ExtArgs extends runtime.Types.Extensions.In
     sourceIds: string[]
     status: $Enums.ArtifactStatus
     metadata: runtime.JsonValue | null
+    options: runtime.JsonValue | null
     jobId: string | null
     createdAt: Date
     updatedAt: Date
@@ -1140,6 +1168,7 @@ export interface LearningArtifactFieldRefs {
   readonly sourceIds: Prisma.FieldRef<"LearningArtifact", 'String[]'>
   readonly status: Prisma.FieldRef<"LearningArtifact", 'ArtifactStatus'>
   readonly metadata: Prisma.FieldRef<"LearningArtifact", 'Json'>
+  readonly options: Prisma.FieldRef<"LearningArtifact", 'Json'>
   readonly jobId: Prisma.FieldRef<"LearningArtifact", 'String'>
   readonly createdAt: Prisma.FieldRef<"LearningArtifact", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"LearningArtifact", 'DateTime'>

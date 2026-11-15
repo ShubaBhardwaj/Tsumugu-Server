@@ -7,9 +7,11 @@ export const createWorkspaceSchema = z.object({
   description: z.string().trim().max(500).optional(),
   icon: z.string().trim().max(8).optional(),
   defaultModel: z.enum(CHAT_MODELS).optional(),
+  clientCollectionKey: z.uuid().optional(),
 });
 
 export const updateWorkspaceSchema = createWorkspaceSchema
+  .omit({ clientCollectionKey: true })
   .partial()
   .refine((data) => Object.keys(data).length > 0, {
     message: "At least one field is required",

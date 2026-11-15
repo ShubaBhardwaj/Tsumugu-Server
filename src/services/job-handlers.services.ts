@@ -20,7 +20,13 @@ async function cleanup(ctx: JobContext) {
     where: {
       workspaceId: job.workspaceId,
       ...(job.type === "SOURCE_CLEANUP" ? { resourceId: job.resourceId } : {}),
-      type: { notIn: ["SOURCE_CLEANUP", "WORKSPACE_CLEANUP"] },
+      type: {
+        notIn: [
+          "SOURCE_CLEANUP",
+          "WORKSPACE_CLEANUP",
+          "REPRESENTATION_CLEANUP",
+        ],
+      },
       leaseToken: { startsWith: "worker:" },
       leaseUntil: { gt: new Date() },
     },
@@ -54,6 +60,32 @@ async function cleanup(ctx: JobContext) {
     );
   }
 }
+async function cleanupRepresentation(ctx: JobContext) {
+  const payload = ctx.job.payload as any;
+  if (payload.notBefore && new Date(payload.notBefore) > new Date())
+    throw new RetryJob("Waiting for the upload transport to settle");
+  const running = await prisma.backgroundJob.count({
+    where: {
+      workspaceId: ctx.job.workspaceId,
+      resourceId: ctx.job.resourceId,
+      type: "SOURCE",
+      leaseToken: { startsWith: "worker:" },
+      leaseUntil: { gt: new Date() },
+    },
+  });
+  if (running) throw new RetryJob("Waiting for superseded processing to stop");
+  const publicId = payload.metadata?.publicId;
+  if (typeof publicId !== "string") throw new CancelledJob();
+  const live = await prisma.source.count({
+    where: {
+      deletedAt: null,
+      metadata: { path: ["publicId"], equals: publicId },
+    },
+  });
+  if (live) throw new CancelledJob();
+  await ctx.check();
+  await cleanFile(payload.metadata);
+}
 export async function handleJob(ctx: JobContext) {
   switch (ctx.job.type) {
     case "SOURCE":
@@ -67,5 +99,7 @@ export async function handleJob(ctx: JobContext) {
     case "SOURCE_CLEANUP":
     case "WORKSPACE_CLEANUP":
       return cleanup(ctx);
+    case "REPRESENTATION_CLEANUP":
+      return cleanupRepresentation(ctx);
   }
 }

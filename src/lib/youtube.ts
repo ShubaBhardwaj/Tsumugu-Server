@@ -1,15 +1,9 @@
 import { YoutubeTranscript } from "youtube-transcript";
 import { ValidationError } from "../types/app-error.js";
+import { canonicalSourceUrl } from "./source-identity.js";
 
 export async function fetchYoutubeTranscript(url: string) {
-  const videoId =
-    url.match(
-      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/,
-    )?.[1] ?? url.match(/youtube\.com\/shorts\/([\w-]{11})/)?.[1];
-
-  if (!videoId) {
-    throw new ValidationError("Enter a valid YouTube URL");
-  }
+  const videoId = canonicalSourceUrl(url, "YOUTUBE").slice("youtube:".length);
 
   try {
     const segments = await YoutubeTranscript.fetchTranscript(videoId);

@@ -201,6 +201,8 @@ export type UserWhereInput = {
   sessions?: Prisma.SessionListRelationFilter
   accounts?: Prisma.AccountListRelationFilter
   workspaces?: Prisma.WorkspaceListRelationFilter
+  mobileWorkspaceBindings?: Prisma.MobileWorkspaceBindingListRelationFilter
+  clientSubmissions?: Prisma.ClientSubmissionListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -214,6 +216,8 @@ export type UserOrderByWithRelationInput = {
   sessions?: Prisma.SessionOrderByRelationAggregateInput
   accounts?: Prisma.AccountOrderByRelationAggregateInput
   workspaces?: Prisma.WorkspaceOrderByRelationAggregateInput
+  mobileWorkspaceBindings?: Prisma.MobileWorkspaceBindingOrderByRelationAggregateInput
+  clientSubmissions?: Prisma.ClientSubmissionOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -230,6 +234,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   sessions?: Prisma.SessionListRelationFilter
   accounts?: Prisma.AccountListRelationFilter
   workspaces?: Prisma.WorkspaceListRelationFilter
+  mobileWorkspaceBindings?: Prisma.MobileWorkspaceBindingListRelationFilter
+  clientSubmissions?: Prisma.ClientSubmissionListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -269,6 +275,8 @@ export type UserCreateInput = {
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
+  mobileWorkspaceBindings?: Prisma.MobileWorkspaceBindingCreateNestedManyWithoutUserInput
+  clientSubmissions?: Prisma.ClientSubmissionCreateNestedManyWithoutOwnerInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -282,6 +290,8 @@ export type UserUncheckedCreateInput = {
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
+  mobileWorkspaceBindings?: Prisma.MobileWorkspaceBindingUncheckedCreateNestedManyWithoutUserInput
+  clientSubmissions?: Prisma.ClientSubmissionUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type UserUpdateInput = {
@@ -295,6 +305,8 @@ export type UserUpdateInput = {
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
+  mobileWorkspaceBindings?: Prisma.MobileWorkspaceBindingUpdateManyWithoutUserNestedInput
+  clientSubmissions?: Prisma.ClientSubmissionUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -308,6 +320,8 @@ export type UserUncheckedUpdateInput = {
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
+  mobileWorkspaceBindings?: Prisma.MobileWorkspaceBindingUncheckedUpdateManyWithoutUserNestedInput
+  clientSubmissions?: Prisma.ClientSubmissionUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -433,6 +447,34 @@ export type UserUpdateOneRequiredWithoutWorkspacesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutWorkspacesInput, Prisma.UserUpdateWithoutWorkspacesInput>, Prisma.UserUncheckedUpdateWithoutWorkspacesInput>
 }
 
+export type UserCreateNestedOneWithoutMobileWorkspaceBindingsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutMobileWorkspaceBindingsInput, Prisma.UserUncheckedCreateWithoutMobileWorkspaceBindingsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMobileWorkspaceBindingsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutMobileWorkspaceBindingsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutMobileWorkspaceBindingsInput, Prisma.UserUncheckedCreateWithoutMobileWorkspaceBindingsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMobileWorkspaceBindingsInput
+  upsert?: Prisma.UserUpsertWithoutMobileWorkspaceBindingsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutMobileWorkspaceBindingsInput, Prisma.UserUpdateWithoutMobileWorkspaceBindingsInput>, Prisma.UserUncheckedUpdateWithoutMobileWorkspaceBindingsInput>
+}
+
+export type UserCreateNestedOneWithoutClientSubmissionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutClientSubmissionsInput, Prisma.UserUncheckedCreateWithoutClientSubmissionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutClientSubmissionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutClientSubmissionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutClientSubmissionsInput, Prisma.UserUncheckedCreateWithoutClientSubmissionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutClientSubmissionsInput
+  upsert?: Prisma.UserUpsertWithoutClientSubmissionsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutClientSubmissionsInput, Prisma.UserUpdateWithoutClientSubmissionsInput>, Prisma.UserUncheckedUpdateWithoutClientSubmissionsInput>
+}
+
 export type UserCreateWithoutSessionsInput = {
   id: string
   name: string
@@ -443,6 +485,8 @@ export type UserCreateWithoutSessionsInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
+  mobileWorkspaceBindings?: Prisma.MobileWorkspaceBindingCreateNestedManyWithoutUserInput
+  clientSubmissions?: Prisma.ClientSubmissionCreateNestedManyWithoutOwnerInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -455,6 +499,8 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
+  mobileWorkspaceBindings?: Prisma.MobileWorkspaceBindingUncheckedCreateNestedManyWithoutUserInput
+  clientSubmissions?: Prisma.ClientSubmissionUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -483,6 +529,8 @@ export type UserUpdateWithoutSessionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
+  mobileWorkspaceBindings?: Prisma.MobileWorkspaceBindingUpdateManyWithoutUserNestedInput
+  clientSubmissions?: Prisma.ClientSubmissionUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -495,6 +543,8 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
+  mobileWorkspaceBindings?: Prisma.MobileWorkspaceBindingUncheckedUpdateManyWithoutUserNestedInput
+  clientSubmissions?: Prisma.ClientSubmissionUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserCreateWithoutAccountsInput = {
@@ -507,6 +557,8 @@ export type UserCreateWithoutAccountsInput = {
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
+  mobileWorkspaceBindings?: Prisma.MobileWorkspaceBindingCreateNestedManyWithoutUserInput
+  clientSubmissions?: Prisma.ClientSubmissionCreateNestedManyWithoutOwnerInput
 }
 
 export type UserUncheckedCreateWithoutAccountsInput = {
@@ -519,6 +571,8 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
+  mobileWorkspaceBindings?: Prisma.MobileWorkspaceBindingUncheckedCreateNestedManyWithoutUserInput
+  clientSubmissions?: Prisma.ClientSubmissionUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type UserCreateOrConnectWithoutAccountsInput = {
@@ -547,6 +601,8 @@ export type UserUpdateWithoutAccountsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
+  mobileWorkspaceBindings?: Prisma.MobileWorkspaceBindingUpdateManyWithoutUserNestedInput
+  clientSubmissions?: Prisma.ClientSubmissionUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -559,6 +615,8 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
+  mobileWorkspaceBindings?: Prisma.MobileWorkspaceBindingUncheckedUpdateManyWithoutUserNestedInput
+  clientSubmissions?: Prisma.ClientSubmissionUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserCreateWithoutWorkspacesInput = {
@@ -571,6 +629,8 @@ export type UserCreateWithoutWorkspacesInput = {
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  mobileWorkspaceBindings?: Prisma.MobileWorkspaceBindingCreateNestedManyWithoutUserInput
+  clientSubmissions?: Prisma.ClientSubmissionCreateNestedManyWithoutOwnerInput
 }
 
 export type UserUncheckedCreateWithoutWorkspacesInput = {
@@ -583,6 +643,8 @@ export type UserUncheckedCreateWithoutWorkspacesInput = {
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  mobileWorkspaceBindings?: Prisma.MobileWorkspaceBindingUncheckedCreateNestedManyWithoutUserInput
+  clientSubmissions?: Prisma.ClientSubmissionUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type UserCreateOrConnectWithoutWorkspacesInput = {
@@ -611,6 +673,8 @@ export type UserUpdateWithoutWorkspacesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  mobileWorkspaceBindings?: Prisma.MobileWorkspaceBindingUpdateManyWithoutUserNestedInput
+  clientSubmissions?: Prisma.ClientSubmissionUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutWorkspacesInput = {
@@ -623,6 +687,152 @@ export type UserUncheckedUpdateWithoutWorkspacesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  mobileWorkspaceBindings?: Prisma.MobileWorkspaceBindingUncheckedUpdateManyWithoutUserNestedInput
+  clientSubmissions?: Prisma.ClientSubmissionUncheckedUpdateManyWithoutOwnerNestedInput
+}
+
+export type UserCreateWithoutMobileWorkspaceBindingsInput = {
+  id: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
+  clientSubmissions?: Prisma.ClientSubmissionCreateNestedManyWithoutOwnerInput
+}
+
+export type UserUncheckedCreateWithoutMobileWorkspaceBindingsInput = {
+  id: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
+  clientSubmissions?: Prisma.ClientSubmissionUncheckedCreateNestedManyWithoutOwnerInput
+}
+
+export type UserCreateOrConnectWithoutMobileWorkspaceBindingsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutMobileWorkspaceBindingsInput, Prisma.UserUncheckedCreateWithoutMobileWorkspaceBindingsInput>
+}
+
+export type UserUpsertWithoutMobileWorkspaceBindingsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutMobileWorkspaceBindingsInput, Prisma.UserUncheckedUpdateWithoutMobileWorkspaceBindingsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutMobileWorkspaceBindingsInput, Prisma.UserUncheckedCreateWithoutMobileWorkspaceBindingsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutMobileWorkspaceBindingsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutMobileWorkspaceBindingsInput, Prisma.UserUncheckedUpdateWithoutMobileWorkspaceBindingsInput>
+}
+
+export type UserUpdateWithoutMobileWorkspaceBindingsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
+  clientSubmissions?: Prisma.ClientSubmissionUpdateManyWithoutOwnerNestedInput
+}
+
+export type UserUncheckedUpdateWithoutMobileWorkspaceBindingsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
+  clientSubmissions?: Prisma.ClientSubmissionUncheckedUpdateManyWithoutOwnerNestedInput
+}
+
+export type UserCreateWithoutClientSubmissionsInput = {
+  id: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  workspaces?: Prisma.WorkspaceCreateNestedManyWithoutUserInput
+  mobileWorkspaceBindings?: Prisma.MobileWorkspaceBindingCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutClientSubmissionsInput = {
+  id: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  workspaces?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutUserInput
+  mobileWorkspaceBindings?: Prisma.MobileWorkspaceBindingUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutClientSubmissionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutClientSubmissionsInput, Prisma.UserUncheckedCreateWithoutClientSubmissionsInput>
+}
+
+export type UserUpsertWithoutClientSubmissionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutClientSubmissionsInput, Prisma.UserUncheckedUpdateWithoutClientSubmissionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutClientSubmissionsInput, Prisma.UserUncheckedCreateWithoutClientSubmissionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutClientSubmissionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutClientSubmissionsInput, Prisma.UserUncheckedUpdateWithoutClientSubmissionsInput>
+}
+
+export type UserUpdateWithoutClientSubmissionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  workspaces?: Prisma.WorkspaceUpdateManyWithoutUserNestedInput
+  mobileWorkspaceBindings?: Prisma.MobileWorkspaceBindingUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutClientSubmissionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  workspaces?: Prisma.WorkspaceUncheckedUpdateManyWithoutUserNestedInput
+  mobileWorkspaceBindings?: Prisma.MobileWorkspaceBindingUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -634,12 +844,16 @@ export type UserCountOutputType = {
   sessions: number
   accounts: number
   workspaces: number
+  mobileWorkspaceBindings: number
+  clientSubmissions: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | UserCountOutputTypeCountSessionsArgs
   accounts?: boolean | UserCountOutputTypeCountAccountsArgs
   workspaces?: boolean | UserCountOutputTypeCountWorkspacesArgs
+  mobileWorkspaceBindings?: boolean | UserCountOutputTypeCountMobileWorkspaceBindingsArgs
+  clientSubmissions?: boolean | UserCountOutputTypeCountClientSubmissionsArgs
 }
 
 /**
@@ -673,6 +887,20 @@ export type UserCountOutputTypeCountWorkspacesArgs<ExtArgs extends runtime.Types
   where?: Prisma.WorkspaceWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountMobileWorkspaceBindingsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MobileWorkspaceBindingWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountClientSubmissionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ClientSubmissionWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -685,6 +913,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
   workspaces?: boolean | Prisma.User$workspacesArgs<ExtArgs>
+  mobileWorkspaceBindings?: boolean | Prisma.User$mobileWorkspaceBindingsArgs<ExtArgs>
+  clientSubmissions?: boolean | Prisma.User$clientSubmissionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -723,6 +953,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
   workspaces?: boolean | Prisma.User$workspacesArgs<ExtArgs>
+  mobileWorkspaceBindings?: boolean | Prisma.User$mobileWorkspaceBindingsArgs<ExtArgs>
+  clientSubmissions?: boolean | Prisma.User$clientSubmissionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -734,6 +966,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     sessions: Prisma.$SessionPayload<ExtArgs>[]
     accounts: Prisma.$AccountPayload<ExtArgs>[]
     workspaces: Prisma.$WorkspacePayload<ExtArgs>[]
+    mobileWorkspaceBindings: Prisma.$MobileWorkspaceBindingPayload<ExtArgs>[]
+    clientSubmissions: Prisma.$ClientSubmissionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1140,6 +1374,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   accounts<T extends Prisma.User$accountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$accountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   workspaces<T extends Prisma.User$workspacesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$workspacesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WorkspacePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  mobileWorkspaceBindings<T extends Prisma.User$mobileWorkspaceBindingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$mobileWorkspaceBindingsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MobileWorkspaceBindingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  clientSubmissions<T extends Prisma.User$clientSubmissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$clientSubmissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ClientSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1638,6 +1874,54 @@ export type User$workspacesArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.WorkspaceScalarFieldEnum | Prisma.WorkspaceScalarFieldEnum[]
+}
+
+/**
+ * User.mobileWorkspaceBindings
+ */
+export type User$mobileWorkspaceBindingsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MobileWorkspaceBinding
+   */
+  select?: Prisma.MobileWorkspaceBindingSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MobileWorkspaceBinding
+   */
+  omit?: Prisma.MobileWorkspaceBindingOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MobileWorkspaceBindingInclude<ExtArgs> | null
+  where?: Prisma.MobileWorkspaceBindingWhereInput
+  orderBy?: Prisma.MobileWorkspaceBindingOrderByWithRelationInput | Prisma.MobileWorkspaceBindingOrderByWithRelationInput[]
+  cursor?: Prisma.MobileWorkspaceBindingWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MobileWorkspaceBindingScalarFieldEnum | Prisma.MobileWorkspaceBindingScalarFieldEnum[]
+}
+
+/**
+ * User.clientSubmissions
+ */
+export type User$clientSubmissionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ClientSubmission
+   */
+  select?: Prisma.ClientSubmissionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ClientSubmission
+   */
+  omit?: Prisma.ClientSubmissionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ClientSubmissionInclude<ExtArgs> | null
+  where?: Prisma.ClientSubmissionWhereInput
+  orderBy?: Prisma.ClientSubmissionOrderByWithRelationInput | Prisma.ClientSubmissionOrderByWithRelationInput[]
+  cursor?: Prisma.ClientSubmissionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ClientSubmissionScalarFieldEnum | Prisma.ClientSubmissionScalarFieldEnum[]
 }
 
 /**

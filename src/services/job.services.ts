@@ -163,6 +163,9 @@ export async function waitForDeliveries() {
   await Promise.all([...pendingDeliveries]);
 }
 export async function recoverJobs() {
+  await (
+    await import("./mobile-source.services.js")
+  ).recoverClientSubmissions();
   const now = new Date();
   const expired = await prisma.backgroundJob.findMany({
     where: {

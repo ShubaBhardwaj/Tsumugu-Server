@@ -46,10 +46,11 @@ export function createWorkspaceRecord(
   userId: string,
   data: CreateWorkspaceInput,
 ) {
+  const { clientCollectionKey: _key, ...fields } = data;
   return prisma.workspace.create({
     data: {
       userId,
-      ...data,
+      ...fields,
     },
     select: workspaceSelect,
   });

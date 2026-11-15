@@ -11,6 +11,17 @@ import {
 } from "../validators/source.validator.js";
 import { workspaceIdParamSchema } from "../validators/workspace.validator.js";
 import {
+  idempotencyKey,
+  parseIfMatch,
+  replaceContentSchema,
+  uploadPdfSchema,
+} from "../validators/mobile.validator.js";
+import {
+  getMobileBindings,
+  getMobileReplacementType,
+  submitMobileSource,
+} from "../services/mobile-source.services.js";
+import {
   bulkDeleteSourcesForWorkspace,
   createTextOrMarkdownSource,
   deleteSourceForWorkspace,
@@ -120,7 +131,12 @@ export async function createSource(req: Request, res: Response) {
 
 export async function deleteSource(req: Request, res: Response) {
   const { workspaceId, sourceId } = parseSourceParams(req.params);
-  await deleteSourceForWorkspace(workspaceId, sourceId, req.session.user.id);
+  await deleteSourceForWorkspace(
+    workspaceId,
+    sourceId,
+    req.session.user.id,
+    parseIfMatch(req.get("If-Match")),
+  );
   res.status(204).send();
 }
 
@@ -131,6 +147,7 @@ export async function bulkDeleteSources(req: Request, res: Response) {
     workspaceId,
     req.session.user.id,
     input.sourceIds,
+    input.expectedRevisions,
   );
   res.status(204).send();
 }
@@ -142,7 +159,21 @@ export async function uploadPdf(req: Request, res: Response) {
     throw new ValidationError("PDF file is required");
   }
 
-  const title = typeof req.body.title === "string" ? req.body.title : undefined;
+  const input = uploadPdfSchema.parse(req.body);
+  const key = idempotencyKey(req.get("Idempotency-Key"), !!input.clientItemKey);
+  if (key) {
+    const result = await submitMobileSource(workspaceId, req.session.user.id, {
+      ...input,
+      clientItemKey: input.clientItemKey!,
+      contentRevision: input.contentRevision!,
+      type: "PDF",
+      file: req.file,
+      idempotencyKey: key,
+    });
+    res.status(result.status).json(result.body);
+    return;
+  }
+  const title = input.title;
 
   const source = await uploadPdfSource(
     workspaceId,
@@ -157,6 +188,18 @@ export async function uploadPdf(req: Request, res: Response) {
 export async function importWebsite(req: Request, res: Response) {
   const { workspaceId } = workspaceIdParamSchema.parse(req.params);
   const input = importWebsiteSchema.parse(req.body);
+  const key = idempotencyKey(req.get("Idempotency-Key"), !!input.clientItemKey);
+  if (key) {
+    const result = await submitMobileSource(workspaceId, req.session.user.id, {
+      ...input,
+      clientItemKey: input.clientItemKey!,
+      contentRevision: input.contentRevision!,
+      type: "WEBSITE",
+      idempotencyKey: key,
+    });
+    res.status(result.status).json(result.body);
+    return;
+  }
   const source = await importWebsiteSource(
     workspaceId,
     req.session.user.id,
@@ -168,10 +211,50 @@ export async function importWebsite(req: Request, res: Response) {
 export async function importYoutube(req: Request, res: Response) {
   const { workspaceId } = workspaceIdParamSchema.parse(req.params);
   const input = importYoutubeSchema.parse(req.body);
+  const key = idempotencyKey(req.get("Idempotency-Key"), !!input.clientItemKey);
+  if (key) {
+    const result = await submitMobileSource(workspaceId, req.session.user.id, {
+      ...input,
+      clientItemKey: input.clientItemKey!,
+      contentRevision: input.contentRevision!,
+      type: "YOUTUBE",
+      idempotencyKey: key,
+    });
+    res.status(result.status).json(result.body);
+    return;
+  }
   const source = await importYoutubeSource(
     workspaceId,
     req.session.user.id,
     input,
   );
   res.status(201).json(source);
+}
+
+export async function mobileBindings(req: Request, res: Response) {
+  const { workspaceId } = parseWorkspaceId(req.params);
+  res.json(await getMobileBindings(workspaceId, req.session.user.id));
+}
+
+export async function replaceContent(req: Request, res: Response) {
+  const { workspaceId, sourceId } = parseSourceParams(req.params);
+  const input = replaceContentSchema.parse(req.body);
+  const key = idempotencyKey(req.get("Idempotency-Key"), true)!;
+  const type = await getMobileReplacementType(
+    workspaceId,
+    sourceId,
+    req.session.user.id,
+  );
+  if (!["PDF", "WEBSITE", "YOUTUBE"].includes(type))
+    throw new ValidationError(
+      "Only mobile PDF/URL sources support content replacement",
+    );
+  const result = await submitMobileSource(workspaceId, req.session.user.id, {
+    ...input,
+    sourceId,
+    type: type as "PDF" | "WEBSITE" | "YOUTUBE",
+    file: req.file,
+    idempotencyKey: key,
+  });
+  res.status(result.status).json(result.body);
 }

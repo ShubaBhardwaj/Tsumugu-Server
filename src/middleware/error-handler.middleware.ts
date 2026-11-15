@@ -11,8 +11,10 @@ export function errorHandler(
   _next: NextFunction,
 ): void {
   if (error instanceof AppError) {
+    if (error.retryAfter) res.setHeader("Retry-After", error.retryAfter);
     res.status(error.statusCode).json({
       error: error.message,
+      ...(error.code ? { code: error.code } : {}),
       ...(error.details ? { details: error.details } : {}),
     });
     return;

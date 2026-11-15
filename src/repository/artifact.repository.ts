@@ -10,6 +10,7 @@ export const artifactSelect = {
   sourceIds: true,
   status: true,
   metadata: true,
+  options: true,
   jobId: true,
   createdAt: true,
   updatedAt: true,

@@ -218,6 +218,8 @@ export type WorkspaceWhereInput = {
   sources?: Prisma.SourceListRelationFilter
   conversations?: Prisma.ConversationListRelationFilter
   artifacts?: Prisma.LearningArtifactListRelationFilter
+  mobileBinding?: Prisma.XOR<Prisma.MobileWorkspaceBindingNullableScalarRelationFilter, Prisma.MobileWorkspaceBindingWhereInput> | null
+  mobileSourceBindings?: Prisma.MobileSourceBindingListRelationFilter
 }
 
 export type WorkspaceOrderByWithRelationInput = {
@@ -234,6 +236,8 @@ export type WorkspaceOrderByWithRelationInput = {
   sources?: Prisma.SourceOrderByRelationAggregateInput
   conversations?: Prisma.ConversationOrderByRelationAggregateInput
   artifacts?: Prisma.LearningArtifactOrderByRelationAggregateInput
+  mobileBinding?: Prisma.MobileWorkspaceBindingOrderByWithRelationInput
+  mobileSourceBindings?: Prisma.MobileSourceBindingOrderByRelationAggregateInput
 }
 
 export type WorkspaceWhereUniqueInput = Prisma.AtLeast<{
@@ -253,6 +257,8 @@ export type WorkspaceWhereUniqueInput = Prisma.AtLeast<{
   sources?: Prisma.SourceListRelationFilter
   conversations?: Prisma.ConversationListRelationFilter
   artifacts?: Prisma.LearningArtifactListRelationFilter
+  mobileBinding?: Prisma.XOR<Prisma.MobileWorkspaceBindingNullableScalarRelationFilter, Prisma.MobileWorkspaceBindingWhereInput> | null
+  mobileSourceBindings?: Prisma.MobileSourceBindingListRelationFilter
 }, "id">
 
 export type WorkspaceOrderByWithAggregationInput = {
@@ -298,6 +304,8 @@ export type WorkspaceCreateInput = {
   sources?: Prisma.SourceCreateNestedManyWithoutWorkspaceInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutWorkspaceInput
   artifacts?: Prisma.LearningArtifactCreateNestedManyWithoutWorkspaceInput
+  mobileBinding?: Prisma.MobileWorkspaceBindingCreateNestedOneWithoutWorkspaceInput
+  mobileSourceBindings?: Prisma.MobileSourceBindingCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUncheckedCreateInput = {
@@ -313,6 +321,8 @@ export type WorkspaceUncheckedCreateInput = {
   sources?: Prisma.SourceUncheckedCreateNestedManyWithoutWorkspaceInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutWorkspaceInput
   artifacts?: Prisma.LearningArtifactUncheckedCreateNestedManyWithoutWorkspaceInput
+  mobileBinding?: Prisma.MobileWorkspaceBindingUncheckedCreateNestedOneWithoutWorkspaceInput
+  mobileSourceBindings?: Prisma.MobileSourceBindingUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUpdateInput = {
@@ -328,6 +338,8 @@ export type WorkspaceUpdateInput = {
   sources?: Prisma.SourceUpdateManyWithoutWorkspaceNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutWorkspaceNestedInput
   artifacts?: Prisma.LearningArtifactUpdateManyWithoutWorkspaceNestedInput
+  mobileBinding?: Prisma.MobileWorkspaceBindingUpdateOneWithoutWorkspaceNestedInput
+  mobileSourceBindings?: Prisma.MobileSourceBindingUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateInput = {
@@ -343,6 +355,8 @@ export type WorkspaceUncheckedUpdateInput = {
   sources?: Prisma.SourceUncheckedUpdateManyWithoutWorkspaceNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutWorkspaceNestedInput
   artifacts?: Prisma.LearningArtifactUncheckedUpdateManyWithoutWorkspaceNestedInput
+  mobileBinding?: Prisma.MobileWorkspaceBindingUncheckedUpdateOneWithoutWorkspaceNestedInput
+  mobileSourceBindings?: Prisma.MobileSourceBindingUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceCreateManyInput = {
@@ -431,6 +445,11 @@ export type WorkspaceScalarRelationFilter = {
   isNot?: Prisma.WorkspaceWhereInput
 }
 
+export type WorkspaceNullableScalarRelationFilter = {
+  is?: Prisma.WorkspaceWhereInput | null
+  isNot?: Prisma.WorkspaceWhereInput | null
+}
+
 export type WorkspaceCreateNestedManyWithoutUserInput = {
   create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutUserInput, Prisma.WorkspaceUncheckedCreateWithoutUserInput> | Prisma.WorkspaceCreateWithoutUserInput[] | Prisma.WorkspaceUncheckedCreateWithoutUserInput[]
   connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutUserInput | Prisma.WorkspaceCreateOrConnectWithoutUserInput[]
@@ -515,6 +534,36 @@ export type WorkspaceUpdateOneRequiredWithoutArtifactsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.WorkspaceUpdateToOneWithWhereWithoutArtifactsInput, Prisma.WorkspaceUpdateWithoutArtifactsInput>, Prisma.WorkspaceUncheckedUpdateWithoutArtifactsInput>
 }
 
+export type WorkspaceCreateNestedOneWithoutMobileBindingInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutMobileBindingInput, Prisma.WorkspaceUncheckedCreateWithoutMobileBindingInput>
+  connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutMobileBindingInput
+  connect?: Prisma.WorkspaceWhereUniqueInput
+}
+
+export type WorkspaceUpdateOneWithoutMobileBindingNestedInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutMobileBindingInput, Prisma.WorkspaceUncheckedCreateWithoutMobileBindingInput>
+  connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutMobileBindingInput
+  upsert?: Prisma.WorkspaceUpsertWithoutMobileBindingInput
+  disconnect?: Prisma.WorkspaceWhereInput | boolean
+  delete?: Prisma.WorkspaceWhereInput | boolean
+  connect?: Prisma.WorkspaceWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.WorkspaceUpdateToOneWithWhereWithoutMobileBindingInput, Prisma.WorkspaceUpdateWithoutMobileBindingInput>, Prisma.WorkspaceUncheckedUpdateWithoutMobileBindingInput>
+}
+
+export type WorkspaceCreateNestedOneWithoutMobileSourceBindingsInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutMobileSourceBindingsInput, Prisma.WorkspaceUncheckedCreateWithoutMobileSourceBindingsInput>
+  connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutMobileSourceBindingsInput
+  connect?: Prisma.WorkspaceWhereUniqueInput
+}
+
+export type WorkspaceUpdateOneRequiredWithoutMobileSourceBindingsNestedInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutMobileSourceBindingsInput, Prisma.WorkspaceUncheckedCreateWithoutMobileSourceBindingsInput>
+  connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutMobileSourceBindingsInput
+  upsert?: Prisma.WorkspaceUpsertWithoutMobileSourceBindingsInput
+  connect?: Prisma.WorkspaceWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.WorkspaceUpdateToOneWithWhereWithoutMobileSourceBindingsInput, Prisma.WorkspaceUpdateWithoutMobileSourceBindingsInput>, Prisma.WorkspaceUncheckedUpdateWithoutMobileSourceBindingsInput>
+}
+
 export type WorkspaceCreateWithoutUserInput = {
   id?: string
   title: string
@@ -527,6 +576,8 @@ export type WorkspaceCreateWithoutUserInput = {
   sources?: Prisma.SourceCreateNestedManyWithoutWorkspaceInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutWorkspaceInput
   artifacts?: Prisma.LearningArtifactCreateNestedManyWithoutWorkspaceInput
+  mobileBinding?: Prisma.MobileWorkspaceBindingCreateNestedOneWithoutWorkspaceInput
+  mobileSourceBindings?: Prisma.MobileSourceBindingCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUncheckedCreateWithoutUserInput = {
@@ -541,6 +592,8 @@ export type WorkspaceUncheckedCreateWithoutUserInput = {
   sources?: Prisma.SourceUncheckedCreateNestedManyWithoutWorkspaceInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutWorkspaceInput
   artifacts?: Prisma.LearningArtifactUncheckedCreateNestedManyWithoutWorkspaceInput
+  mobileBinding?: Prisma.MobileWorkspaceBindingUncheckedCreateNestedOneWithoutWorkspaceInput
+  mobileSourceBindings?: Prisma.MobileSourceBindingUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceCreateOrConnectWithoutUserInput = {
@@ -596,6 +649,8 @@ export type WorkspaceCreateWithoutSourcesInput = {
   user: Prisma.UserCreateNestedOneWithoutWorkspacesInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutWorkspaceInput
   artifacts?: Prisma.LearningArtifactCreateNestedManyWithoutWorkspaceInput
+  mobileBinding?: Prisma.MobileWorkspaceBindingCreateNestedOneWithoutWorkspaceInput
+  mobileSourceBindings?: Prisma.MobileSourceBindingCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUncheckedCreateWithoutSourcesInput = {
@@ -610,6 +665,8 @@ export type WorkspaceUncheckedCreateWithoutSourcesInput = {
   updatedAt?: Date | string
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutWorkspaceInput
   artifacts?: Prisma.LearningArtifactUncheckedCreateNestedManyWithoutWorkspaceInput
+  mobileBinding?: Prisma.MobileWorkspaceBindingUncheckedCreateNestedOneWithoutWorkspaceInput
+  mobileSourceBindings?: Prisma.MobileSourceBindingUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceCreateOrConnectWithoutSourcesInput = {
@@ -640,6 +697,8 @@ export type WorkspaceUpdateWithoutSourcesInput = {
   user?: Prisma.UserUpdateOneRequiredWithoutWorkspacesNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutWorkspaceNestedInput
   artifacts?: Prisma.LearningArtifactUpdateManyWithoutWorkspaceNestedInput
+  mobileBinding?: Prisma.MobileWorkspaceBindingUpdateOneWithoutWorkspaceNestedInput
+  mobileSourceBindings?: Prisma.MobileSourceBindingUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateWithoutSourcesInput = {
@@ -654,6 +713,8 @@ export type WorkspaceUncheckedUpdateWithoutSourcesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutWorkspaceNestedInput
   artifacts?: Prisma.LearningArtifactUncheckedUpdateManyWithoutWorkspaceNestedInput
+  mobileBinding?: Prisma.MobileWorkspaceBindingUncheckedUpdateOneWithoutWorkspaceNestedInput
+  mobileSourceBindings?: Prisma.MobileSourceBindingUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceCreateWithoutConversationsInput = {
@@ -668,6 +729,8 @@ export type WorkspaceCreateWithoutConversationsInput = {
   user: Prisma.UserCreateNestedOneWithoutWorkspacesInput
   sources?: Prisma.SourceCreateNestedManyWithoutWorkspaceInput
   artifacts?: Prisma.LearningArtifactCreateNestedManyWithoutWorkspaceInput
+  mobileBinding?: Prisma.MobileWorkspaceBindingCreateNestedOneWithoutWorkspaceInput
+  mobileSourceBindings?: Prisma.MobileSourceBindingCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUncheckedCreateWithoutConversationsInput = {
@@ -682,6 +745,8 @@ export type WorkspaceUncheckedCreateWithoutConversationsInput = {
   updatedAt?: Date | string
   sources?: Prisma.SourceUncheckedCreateNestedManyWithoutWorkspaceInput
   artifacts?: Prisma.LearningArtifactUncheckedCreateNestedManyWithoutWorkspaceInput
+  mobileBinding?: Prisma.MobileWorkspaceBindingUncheckedCreateNestedOneWithoutWorkspaceInput
+  mobileSourceBindings?: Prisma.MobileSourceBindingUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceCreateOrConnectWithoutConversationsInput = {
@@ -712,6 +777,8 @@ export type WorkspaceUpdateWithoutConversationsInput = {
   user?: Prisma.UserUpdateOneRequiredWithoutWorkspacesNestedInput
   sources?: Prisma.SourceUpdateManyWithoutWorkspaceNestedInput
   artifacts?: Prisma.LearningArtifactUpdateManyWithoutWorkspaceNestedInput
+  mobileBinding?: Prisma.MobileWorkspaceBindingUpdateOneWithoutWorkspaceNestedInput
+  mobileSourceBindings?: Prisma.MobileSourceBindingUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateWithoutConversationsInput = {
@@ -726,6 +793,8 @@ export type WorkspaceUncheckedUpdateWithoutConversationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sources?: Prisma.SourceUncheckedUpdateManyWithoutWorkspaceNestedInput
   artifacts?: Prisma.LearningArtifactUncheckedUpdateManyWithoutWorkspaceNestedInput
+  mobileBinding?: Prisma.MobileWorkspaceBindingUncheckedUpdateOneWithoutWorkspaceNestedInput
+  mobileSourceBindings?: Prisma.MobileSourceBindingUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceCreateWithoutArtifactsInput = {
@@ -740,6 +809,8 @@ export type WorkspaceCreateWithoutArtifactsInput = {
   user: Prisma.UserCreateNestedOneWithoutWorkspacesInput
   sources?: Prisma.SourceCreateNestedManyWithoutWorkspaceInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutWorkspaceInput
+  mobileBinding?: Prisma.MobileWorkspaceBindingCreateNestedOneWithoutWorkspaceInput
+  mobileSourceBindings?: Prisma.MobileSourceBindingCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUncheckedCreateWithoutArtifactsInput = {
@@ -754,6 +825,8 @@ export type WorkspaceUncheckedCreateWithoutArtifactsInput = {
   updatedAt?: Date | string
   sources?: Prisma.SourceUncheckedCreateNestedManyWithoutWorkspaceInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutWorkspaceInput
+  mobileBinding?: Prisma.MobileWorkspaceBindingUncheckedCreateNestedOneWithoutWorkspaceInput
+  mobileSourceBindings?: Prisma.MobileSourceBindingUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceCreateOrConnectWithoutArtifactsInput = {
@@ -784,6 +857,8 @@ export type WorkspaceUpdateWithoutArtifactsInput = {
   user?: Prisma.UserUpdateOneRequiredWithoutWorkspacesNestedInput
   sources?: Prisma.SourceUpdateManyWithoutWorkspaceNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutWorkspaceNestedInput
+  mobileBinding?: Prisma.MobileWorkspaceBindingUpdateOneWithoutWorkspaceNestedInput
+  mobileSourceBindings?: Prisma.MobileSourceBindingUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateWithoutArtifactsInput = {
@@ -798,6 +873,168 @@ export type WorkspaceUncheckedUpdateWithoutArtifactsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sources?: Prisma.SourceUncheckedUpdateManyWithoutWorkspaceNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  mobileBinding?: Prisma.MobileWorkspaceBindingUncheckedUpdateOneWithoutWorkspaceNestedInput
+  mobileSourceBindings?: Prisma.MobileSourceBindingUncheckedUpdateManyWithoutWorkspaceNestedInput
+}
+
+export type WorkspaceCreateWithoutMobileBindingInput = {
+  id?: string
+  title: string
+  description?: string | null
+  icon?: string | null
+  defaultModel?: string
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutWorkspacesInput
+  sources?: Prisma.SourceCreateNestedManyWithoutWorkspaceInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutWorkspaceInput
+  artifacts?: Prisma.LearningArtifactCreateNestedManyWithoutWorkspaceInput
+  mobileSourceBindings?: Prisma.MobileSourceBindingCreateNestedManyWithoutWorkspaceInput
+}
+
+export type WorkspaceUncheckedCreateWithoutMobileBindingInput = {
+  id?: string
+  userId: string
+  title: string
+  description?: string | null
+  icon?: string | null
+  defaultModel?: string
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sources?: Prisma.SourceUncheckedCreateNestedManyWithoutWorkspaceInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutWorkspaceInput
+  artifacts?: Prisma.LearningArtifactUncheckedCreateNestedManyWithoutWorkspaceInput
+  mobileSourceBindings?: Prisma.MobileSourceBindingUncheckedCreateNestedManyWithoutWorkspaceInput
+}
+
+export type WorkspaceCreateOrConnectWithoutMobileBindingInput = {
+  where: Prisma.WorkspaceWhereUniqueInput
+  create: Prisma.XOR<Prisma.WorkspaceCreateWithoutMobileBindingInput, Prisma.WorkspaceUncheckedCreateWithoutMobileBindingInput>
+}
+
+export type WorkspaceUpsertWithoutMobileBindingInput = {
+  update: Prisma.XOR<Prisma.WorkspaceUpdateWithoutMobileBindingInput, Prisma.WorkspaceUncheckedUpdateWithoutMobileBindingInput>
+  create: Prisma.XOR<Prisma.WorkspaceCreateWithoutMobileBindingInput, Prisma.WorkspaceUncheckedCreateWithoutMobileBindingInput>
+  where?: Prisma.WorkspaceWhereInput
+}
+
+export type WorkspaceUpdateToOneWithWhereWithoutMobileBindingInput = {
+  where?: Prisma.WorkspaceWhereInput
+  data: Prisma.XOR<Prisma.WorkspaceUpdateWithoutMobileBindingInput, Prisma.WorkspaceUncheckedUpdateWithoutMobileBindingInput>
+}
+
+export type WorkspaceUpdateWithoutMobileBindingInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultModel?: Prisma.StringFieldUpdateOperationsInput | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutWorkspacesNestedInput
+  sources?: Prisma.SourceUpdateManyWithoutWorkspaceNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutWorkspaceNestedInput
+  artifacts?: Prisma.LearningArtifactUpdateManyWithoutWorkspaceNestedInput
+  mobileSourceBindings?: Prisma.MobileSourceBindingUpdateManyWithoutWorkspaceNestedInput
+}
+
+export type WorkspaceUncheckedUpdateWithoutMobileBindingInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultModel?: Prisma.StringFieldUpdateOperationsInput | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sources?: Prisma.SourceUncheckedUpdateManyWithoutWorkspaceNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  artifacts?: Prisma.LearningArtifactUncheckedUpdateManyWithoutWorkspaceNestedInput
+  mobileSourceBindings?: Prisma.MobileSourceBindingUncheckedUpdateManyWithoutWorkspaceNestedInput
+}
+
+export type WorkspaceCreateWithoutMobileSourceBindingsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  icon?: string | null
+  defaultModel?: string
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutWorkspacesInput
+  sources?: Prisma.SourceCreateNestedManyWithoutWorkspaceInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutWorkspaceInput
+  artifacts?: Prisma.LearningArtifactCreateNestedManyWithoutWorkspaceInput
+  mobileBinding?: Prisma.MobileWorkspaceBindingCreateNestedOneWithoutWorkspaceInput
+}
+
+export type WorkspaceUncheckedCreateWithoutMobileSourceBindingsInput = {
+  id?: string
+  userId: string
+  title: string
+  description?: string | null
+  icon?: string | null
+  defaultModel?: string
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sources?: Prisma.SourceUncheckedCreateNestedManyWithoutWorkspaceInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutWorkspaceInput
+  artifacts?: Prisma.LearningArtifactUncheckedCreateNestedManyWithoutWorkspaceInput
+  mobileBinding?: Prisma.MobileWorkspaceBindingUncheckedCreateNestedOneWithoutWorkspaceInput
+}
+
+export type WorkspaceCreateOrConnectWithoutMobileSourceBindingsInput = {
+  where: Prisma.WorkspaceWhereUniqueInput
+  create: Prisma.XOR<Prisma.WorkspaceCreateWithoutMobileSourceBindingsInput, Prisma.WorkspaceUncheckedCreateWithoutMobileSourceBindingsInput>
+}
+
+export type WorkspaceUpsertWithoutMobileSourceBindingsInput = {
+  update: Prisma.XOR<Prisma.WorkspaceUpdateWithoutMobileSourceBindingsInput, Prisma.WorkspaceUncheckedUpdateWithoutMobileSourceBindingsInput>
+  create: Prisma.XOR<Prisma.WorkspaceCreateWithoutMobileSourceBindingsInput, Prisma.WorkspaceUncheckedCreateWithoutMobileSourceBindingsInput>
+  where?: Prisma.WorkspaceWhereInput
+}
+
+export type WorkspaceUpdateToOneWithWhereWithoutMobileSourceBindingsInput = {
+  where?: Prisma.WorkspaceWhereInput
+  data: Prisma.XOR<Prisma.WorkspaceUpdateWithoutMobileSourceBindingsInput, Prisma.WorkspaceUncheckedUpdateWithoutMobileSourceBindingsInput>
+}
+
+export type WorkspaceUpdateWithoutMobileSourceBindingsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultModel?: Prisma.StringFieldUpdateOperationsInput | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutWorkspacesNestedInput
+  sources?: Prisma.SourceUpdateManyWithoutWorkspaceNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutWorkspaceNestedInput
+  artifacts?: Prisma.LearningArtifactUpdateManyWithoutWorkspaceNestedInput
+  mobileBinding?: Prisma.MobileWorkspaceBindingUpdateOneWithoutWorkspaceNestedInput
+}
+
+export type WorkspaceUncheckedUpdateWithoutMobileSourceBindingsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultModel?: Prisma.StringFieldUpdateOperationsInput | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sources?: Prisma.SourceUncheckedUpdateManyWithoutWorkspaceNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  artifacts?: Prisma.LearningArtifactUncheckedUpdateManyWithoutWorkspaceNestedInput
+  mobileBinding?: Prisma.MobileWorkspaceBindingUncheckedUpdateOneWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceCreateManyUserInput = {
@@ -823,6 +1060,8 @@ export type WorkspaceUpdateWithoutUserInput = {
   sources?: Prisma.SourceUpdateManyWithoutWorkspaceNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutWorkspaceNestedInput
   artifacts?: Prisma.LearningArtifactUpdateManyWithoutWorkspaceNestedInput
+  mobileBinding?: Prisma.MobileWorkspaceBindingUpdateOneWithoutWorkspaceNestedInput
+  mobileSourceBindings?: Prisma.MobileSourceBindingUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateWithoutUserInput = {
@@ -837,6 +1076,8 @@ export type WorkspaceUncheckedUpdateWithoutUserInput = {
   sources?: Prisma.SourceUncheckedUpdateManyWithoutWorkspaceNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutWorkspaceNestedInput
   artifacts?: Prisma.LearningArtifactUncheckedUpdateManyWithoutWorkspaceNestedInput
+  mobileBinding?: Prisma.MobileWorkspaceBindingUncheckedUpdateOneWithoutWorkspaceNestedInput
+  mobileSourceBindings?: Prisma.MobileSourceBindingUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateManyWithoutUserInput = {
@@ -859,12 +1100,14 @@ export type WorkspaceCountOutputType = {
   sources: number
   conversations: number
   artifacts: number
+  mobileSourceBindings: number
 }
 
 export type WorkspaceCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sources?: boolean | WorkspaceCountOutputTypeCountSourcesArgs
   conversations?: boolean | WorkspaceCountOutputTypeCountConversationsArgs
   artifacts?: boolean | WorkspaceCountOutputTypeCountArtifactsArgs
+  mobileSourceBindings?: boolean | WorkspaceCountOutputTypeCountMobileSourceBindingsArgs
 }
 
 /**
@@ -898,6 +1141,13 @@ export type WorkspaceCountOutputTypeCountArtifactsArgs<ExtArgs extends runtime.T
   where?: Prisma.LearningArtifactWhereInput
 }
 
+/**
+ * WorkspaceCountOutputType without action
+ */
+export type WorkspaceCountOutputTypeCountMobileSourceBindingsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MobileSourceBindingWhereInput
+}
+
 
 export type WorkspaceSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -913,6 +1163,8 @@ export type WorkspaceSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   sources?: boolean | Prisma.Workspace$sourcesArgs<ExtArgs>
   conversations?: boolean | Prisma.Workspace$conversationsArgs<ExtArgs>
   artifacts?: boolean | Prisma.Workspace$artifactsArgs<ExtArgs>
+  mobileBinding?: boolean | Prisma.Workspace$mobileBindingArgs<ExtArgs>
+  mobileSourceBindings?: boolean | Prisma.Workspace$mobileSourceBindingsArgs<ExtArgs>
   _count?: boolean | Prisma.WorkspaceCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["workspace"]>
 
@@ -960,6 +1212,8 @@ export type WorkspaceInclude<ExtArgs extends runtime.Types.Extensions.InternalAr
   sources?: boolean | Prisma.Workspace$sourcesArgs<ExtArgs>
   conversations?: boolean | Prisma.Workspace$conversationsArgs<ExtArgs>
   artifacts?: boolean | Prisma.Workspace$artifactsArgs<ExtArgs>
+  mobileBinding?: boolean | Prisma.Workspace$mobileBindingArgs<ExtArgs>
+  mobileSourceBindings?: boolean | Prisma.Workspace$mobileSourceBindingsArgs<ExtArgs>
   _count?: boolean | Prisma.WorkspaceCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type WorkspaceIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -976,6 +1230,8 @@ export type $WorkspacePayload<ExtArgs extends runtime.Types.Extensions.InternalA
     sources: Prisma.$SourcePayload<ExtArgs>[]
     conversations: Prisma.$ConversationPayload<ExtArgs>[]
     artifacts: Prisma.$LearningArtifactPayload<ExtArgs>[]
+    mobileBinding: Prisma.$MobileWorkspaceBindingPayload<ExtArgs> | null
+    mobileSourceBindings: Prisma.$MobileSourceBindingPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1385,6 +1641,8 @@ export interface Prisma__WorkspaceClient<T, Null = never, ExtArgs extends runtim
   sources<T extends Prisma.Workspace$sourcesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workspace$sourcesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   conversations<T extends Prisma.Workspace$conversationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workspace$conversationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   artifacts<T extends Prisma.Workspace$artifactsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workspace$artifactsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LearningArtifactPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  mobileBinding<T extends Prisma.Workspace$mobileBindingArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workspace$mobileBindingArgs<ExtArgs>>): Prisma.Prisma__MobileWorkspaceBindingClient<runtime.Types.Result.GetResult<Prisma.$MobileWorkspaceBindingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  mobileSourceBindings<T extends Prisma.Workspace$mobileSourceBindingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workspace$mobileSourceBindingsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MobileSourceBindingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1893,6 +2151,49 @@ export type Workspace$artifactsArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.LearningArtifactScalarFieldEnum | Prisma.LearningArtifactScalarFieldEnum[]
+}
+
+/**
+ * Workspace.mobileBinding
+ */
+export type Workspace$mobileBindingArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MobileWorkspaceBinding
+   */
+  select?: Prisma.MobileWorkspaceBindingSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MobileWorkspaceBinding
+   */
+  omit?: Prisma.MobileWorkspaceBindingOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MobileWorkspaceBindingInclude<ExtArgs> | null
+  where?: Prisma.MobileWorkspaceBindingWhereInput
+}
+
+/**
+ * Workspace.mobileSourceBindings
+ */
+export type Workspace$mobileSourceBindingsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MobileSourceBinding
+   */
+  select?: Prisma.MobileSourceBindingSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MobileSourceBinding
+   */
+  omit?: Prisma.MobileSourceBindingOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MobileSourceBindingInclude<ExtArgs> | null
+  where?: Prisma.MobileSourceBindingWhereInput
+  orderBy?: Prisma.MobileSourceBindingOrderByWithRelationInput | Prisma.MobileSourceBindingOrderByWithRelationInput[]
+  cursor?: Prisma.MobileSourceBindingWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MobileSourceBindingScalarFieldEnum | Prisma.MobileSourceBindingScalarFieldEnum[]
 }
 
 /**

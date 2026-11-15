@@ -9,7 +9,7 @@ import {
   workspaceTransaction,
 } from "../repository/job.repository.js";
 import { kickJob } from "./job.services.js";
-import { NotFoundError } from "../types/app-error.js";
+import { AppError, NotFoundError } from "../types/app-error.js";
 import type {
   CreateSourceInput,
   ImportWebsiteInput,
@@ -63,6 +63,7 @@ export async function bulkDeleteSourcesForWorkspace(
   workspaceId: string,
   userId: string,
   sourceIds: string[],
+  expectedRevisions?: Record<string, string>,
 ) {
   const ids = [...new Set(sourceIds)];
   const jobs = await workspaceTransaction(workspaceId, async (tx) => {
@@ -77,6 +78,29 @@ export async function bulkDeleteSourcesForWorkspace(
     });
     if (sources.length !== ids.length)
       throw new NotFoundError("Source not found");
+    if (expectedRevisions) {
+      const bindings = await tx.mobileSourceBinding.findMany({
+        where: { workspaceId, sourceId: { in: ids }, deletedAt: null },
+      });
+      if (
+        Object.keys(expectedRevisions).length !== ids.length ||
+        bindings.length !== ids.length ||
+        bindings.some(
+          (binding) =>
+            binding.contentRevision !== expectedRevisions[binding.sourceId!],
+        )
+      )
+        throw new AppError(
+          409,
+          "Source revision changed or source is not mobile-bound. Reload mobile bindings.",
+          undefined,
+          "REVISION_CONFLICT",
+        );
+    }
+    await tx.mobileSourceBinding.updateMany({
+      where: { workspaceId, sourceId: { in: ids } },
+      data: { deletedAt: new Date() },
+    });
     await tx.source.updateMany({
       where: { id: { in: ids } },
       data: { deletedAt: new Date() },
@@ -108,8 +132,14 @@ export async function deleteSourceForWorkspace(
   workspaceId: string,
   sourceId: string,
   userId: string,
+  expectedRevision?: string,
 ) {
-  await bulkDeleteSourcesForWorkspace(workspaceId, userId, [sourceId]);
+  await bulkDeleteSourcesForWorkspace(
+    workspaceId,
+    userId,
+    [sourceId],
+    expectedRevision ? { [sourceId]: expectedRevision } : undefined,
+  );
 }
 export async function createTextOrMarkdownSource(
   workspaceId: string,

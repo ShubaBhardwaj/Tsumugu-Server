@@ -11,6 +11,8 @@ import {
   importYoutube,
   listSources,
   uploadPdf,
+  mobileBindings,
+  replaceContent,
 } from "../controllers/source.controller.js";
 import { uploadSinglePdf } from "../middleware/upload.middleware.js";
 
@@ -22,6 +24,12 @@ sourceRoutes.post("/import/youtube", asyncHandler(importYoutube));
 sourceRoutes.get("/", asyncHandler(listSources));
 sourceRoutes.post("/", asyncHandler(createSource));
 sourceRoutes.post("/bulk-delete", asyncHandler(bulkDeleteSources));
+sourceRoutes.get("/mobile-bindings", asyncHandler(mobileBindings));
+sourceRoutes.put(
+  "/:sourceId/content",
+  uploadSinglePdf,
+  asyncHandler(replaceContent),
+);
 sourceRoutes.get("/:sourceId", asyncHandler(getSource));
 sourceRoutes.delete("/:sourceId", asyncHandler(deleteSource));
 

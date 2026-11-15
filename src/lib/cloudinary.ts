@@ -58,6 +58,7 @@ export function getSignedCloudinaryDownloadUrl(
 export async function uploadPdfToCloudinary(
   buffer: Buffer,
   filename: string,
+  representationTarget?: string,
 ): Promise<CloudinaryUploadResult> {
   if (!cloudName) {
     throw new ValidationError("Cloudinary is not configured on the server");
@@ -69,8 +70,17 @@ export async function uploadPdfToCloudinary(
     new Blob([new Uint8Array(buffer)], { type: "application/pdf" }),
     filename,
   );
-  form.append("upload_preset", uploadPreset);
-  form.append("folder", "tsumugu/pdfs");
+  if (representationTarget) {
+    if (!apiKey || !apiSecret)
+      throw new ValidationError("Recoverable PDF uploads are not configured");
+    const params = { public_id: representationTarget, overwrite: false, timestamp: Math.floor(Date.now() / 1000) };
+    for (const [key, value] of Object.entries(params)) form.append(key, String(value));
+    form.append("api_key", apiKey);
+    form.append("signature", cloudinary.utils.api_sign_request(params, apiSecret));
+  } else {
+    form.append("upload_preset", uploadPreset);
+    form.append("folder", "tsumugu/pdfs");
+  }
 
   const response = await fetch(
     `https://api.cloudinary.com/v1_1/${cloudName}/raw/upload`,
@@ -80,6 +90,7 @@ export async function uploadPdfToCloudinary(
   const result = (await response.json()) as CloudinaryUploadResponse;
 
   if (!response.ok) {
+    if (representationTarget) throw new ValidationError("PDF upload failed. Retry with a new operation key.");
     const message =
       result.error?.message ?? `Cloudinary upload failed (${response.status})`;
 
@@ -91,6 +102,9 @@ export async function uploadPdfToCloudinary(
 
     throw new ValidationError(message);
   }
+
+  if (representationTarget && result.public_id !== representationTarget)
+    throw new ValidationError("PDF representation could not be verified");
 
   return {
     secureUrl: result.secure_url,
