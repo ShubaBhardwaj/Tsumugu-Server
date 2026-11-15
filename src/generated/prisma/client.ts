@@ -93,21 +93,21 @@ export type Message = Prisma.MessageModel
 export type LearningArtifact = Prisma.LearningArtifactModel
 /**
  * Model MobileWorkspaceBinding
- *
+ * 
  */
 export type MobileWorkspaceBinding = Prisma.MobileWorkspaceBindingModel
 /**
  * Model MobileSourceBinding
- *
+ * 
  */
 export type MobileSourceBinding = Prisma.MobileSourceBindingModel
 /**
  * Model ClientSubmission
- *
+ * 
  */
 export type ClientSubmission = Prisma.ClientSubmissionModel
 /**
  * Model BackgroundJob
- *
+ * 
  */
 export type BackgroundJob = Prisma.BackgroundJobModel

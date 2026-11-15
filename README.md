@@ -1,18 +1,83 @@
-# Tsumugu backend
+# Tsumugu Server
 
-Express/TypeScript, Prisma/PostgreSQL, Better Auth, Inngest, OpenAI, Pinecone, Cloudinary, Firecrawl, and optional Tavily/Mem0. Bun is the package manager. Business logic stays in services; controllers validate input and repositories handle saved data.
+**Turn a collection of sources into a place to study.** Tsumugu's backend handles source ingestion, grounded chat, learning artifacts, authentication, and recoverable background work for web and mobile clients.
 
-## Local setup
+<p>
+  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-API-3178C6?logo=typescript&amp;logoColor=white">
+  <img alt="Bun" src="https://img.shields.io/badge/Bun-package%20manager-14151A?logo=bun&amp;logoColor=white">
+  <img alt="PostgreSQL" src="https://img.shields.io/badge/PostgreSQL-Prisma-4169E1?logo=postgresql&amp;logoColor=white">
+  <img alt="Docker" src="https://img.shields.io/badge/Docker-deployment-2496ED?logo=docker&amp;logoColor=white">
+</p>
 
-1. Run `bun install`.
-2. Copy `.env.example` to your own `.env` and supply your development settings. Never commit real keys.
-3. Run `bunx --no-install prisma generate`, then `bunx --no-install prisma migrate deploy` against your intended development database.
-4. Run `bun run dev`.
-5. Run `bunx inngest-cli@latest dev -u http://localhost:8080/api/inngest` in another terminal. The CLI download is needed only for local worker development. Use your configured port if it differs.
+> [!NOTE]
+> This repository contains the **backend only**. The mobile application and its later authentication/integration work live separately.
+
+## What it does
+
+| Area | Capability |
+| --- | --- |
+| Sources | Save text and Markdown; import websites, YouTube videos, and PDFs; track processing and reprocessing. |
+| Study | Chat with citations from a workspace's sources and generate summaries, takeaways, flashcards, quizzes, mind maps, and reports. |
+| Accounts | Google sign-in through Better Auth, with browser sessions and an Expo-compatible native callback. |
+| Reliability | Durable jobs, retries, recovery, and cleanup for interrupted processing. |
+| Mobile contract | Stable collection/source bindings, idempotent submissions, content replacement, and explicit deletion semantics. |
+
+**Stack:** Express 5, TypeScript, Prisma/PostgreSQL, Better Auth, Inngest, OpenAI, Pinecone, Cloudinary, Firecrawl, and optional Tavily/Mem0. Bun manages packages; the production build runs on Node.js. Controllers validate requests, services hold business logic, and repositories manage persistence.
+
+## Contents
+
+- [Run locally](#run-locally)
+- [Deploy on a VPS](#deploy-on-a-vps)
+- [API overview](#apis)
+- [Deletion and recovery](#deletion-and-recovery)
+- [Native authentication and mobile contract](#native-authentication-and-mobile-contract)
+- [Verification](#verification)
+
+## Run locally
+
+1. Install dependencies with `bun install`.
+2. Copy `.env.example` to `.env` and fill in your development settings. Keep real credentials out of Git.
+3. Generate the Prisma client with `bunx --no-install prisma generate`.
+4. Apply migrations to the intended development database with `bunx --no-install prisma migrate deploy`.
+5. Start the API with `bun run dev`. Check `http://localhost:8080/` for `{"status":"ok"}`.
+6. For local background workers, run `bunx inngest-cli@latest dev -u http://localhost:8080/api/inngest` in another terminal. The CLI download is needed only for local worker development. Adjust the URL if you change `PORT`.
 
 `CLIENT_URL` is the frontend origin, defaulting to `http://localhost:3001` in development. `BETTER_AUTH_URL` is the backend auth base URL; do not use it as the frontend origin. Google sign-in and API sessions use Better Auth cookies. Protected endpoints require a valid session. Cross-user or wrong-workspace records return 404; missing sessions return 401.
 
 Production uses `bun run build` and `bun run start`. Set `NODE_ENV=production`, explicit `CLIENT_URL`, Inngest event/signing keys, and all enabled core provider settings. Production rejects `INNGEST_DEV=true`. Register `/api/inngest` with the production Inngest environment. The two registered functions execute jobs and recover pending work once a minute. Do not deploy the old server over the new schema's marked-deleted records; see the change design's migration/rollback instructions.
+
+## Deploy on a VPS
+
+The included [Dockerfile](Dockerfile) builds the API and generates the Prisma client. [Docker Compose](docker-compose.yml) loads production settings from the VPS `.env`, attaches the container to the external `proxy-network`, and checks the `/` health endpoint. At startup, the container applies pending Prisma migrations before starting Node.js. The hosted PostgreSQL URL comes from the **VPS `.env` at runtime**; the build-time URL in the Dockerfile is only a placeholder for client generation.
+
+### First-time VPS setup
+
+1. Install Docker and the Compose plugin on the VPS. Clone this repository into a permanent directory that the deployment SSH user can access. If the repository is private, configure the VPS to read it from GitHub.
+2. Put a production `.env` in that directory, using [.env.example](.env.example) as a checklist. Set the hosted `DATABASE_URL`, public `BETTER_AUTH_URL`, frontend `CLIENT_URL`, provider credentials, and production Inngest keys there. Set `INNGEST_DEV=false`. Do not commit `.env`.
+3. Ensure your reverse proxy and this Compose service use the same external Docker network, named `proxy-network` in the supplied Compose file. Route your API domain to the `tsumugu-backend` service on port `8080`.
+4. Start the service from the repository directory:
+
+   ```bash
+   docker compose up -d --build --wait --wait-timeout 180
+   docker compose ps
+   ```
+
+The database migration runs against the hosted database configured on the VPS. Back up production data and review new migrations before deploying schema changes. If startup fails, inspect `docker compose logs tsumugu-backend`; the container health check expects `{"status":"ok"}` from `/`.
+
+### Automatic deployment
+
+The [GitHub Actions workflow](.github/workflows/deploy.yml) runs on pushes to `main` and can also be started manually from the Actions tab. It SSHs into the VPS, runs `git pull --ff-only origin main`, then rebuilds and waits for the Compose service.
+
+In this repository's **Settings → Secrets and variables → Actions**, configure:
+
+| Kind | Name | Value |
+| --- | --- | --- |
+| Secret | `VPS_HOST` | VPS public IP address or hostname |
+| Secret | `VPS_USER` | SSH user with access to the checkout and Docker |
+| Secret | `VPS_SSH_KEY` | Complete private key corresponding to the public key installed in that user's `~/.ssh/authorized_keys` |
+| Variable | `VPS_APP_DIR` | Absolute path of the repository checkout on the VPS |
+
+Check the path with `pwd` inside the VPS checkout. Verify that the SSH user can run `git pull` and `docker compose` there. The GitHub secrets grant access to the VPS; they do **not** replace the application's `.env` on the VPS. Keep the private key out of the repository and never add it under GitHub's **Deploy keys** page.
 
 ## APIs
 

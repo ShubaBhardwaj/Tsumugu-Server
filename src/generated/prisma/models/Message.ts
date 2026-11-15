@@ -144,13 +144,13 @@ export type MessageAggregateArgs<ExtArgs extends runtime.Types.Extensions.Intern
   _avg?: MessageAvgAggregateInputType
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-   *
+   * 
    * Select which fields to sum
   **/
   _sum?: MessageSumAggregateInputType
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-   *
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: MessageMinAggregateInputType
