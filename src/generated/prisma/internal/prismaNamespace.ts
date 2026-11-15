@@ -406,7 +406,8 @@ export const ModelName = {
   SourceChunk: 'SourceChunk',
   Conversation: 'Conversation',
   Message: 'Message',
-  LearningArtifact: 'LearningArtifact'
+  LearningArtifact: 'LearningArtifact',
+  BackgroundJob: 'BackgroundJob'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -422,7 +423,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "verification" | "workspace" | "source" | "sourceChunk" | "conversation" | "message" | "learningArtifact"
+    modelProps: "user" | "session" | "account" | "verification" | "workspace" | "source" | "sourceChunk" | "conversation" | "message" | "learningArtifact" | "backgroundJob"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1166,6 +1167,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    BackgroundJob: {
+      payload: Prisma.$BackgroundJobPayload<ExtArgs>
+      fields: Prisma.BackgroundJobFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.BackgroundJobFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BackgroundJobPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.BackgroundJobFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BackgroundJobPayload>
+        }
+        findFirst: {
+          args: Prisma.BackgroundJobFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BackgroundJobPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.BackgroundJobFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BackgroundJobPayload>
+        }
+        findMany: {
+          args: Prisma.BackgroundJobFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BackgroundJobPayload>[]
+        }
+        create: {
+          args: Prisma.BackgroundJobCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BackgroundJobPayload>
+        }
+        createMany: {
+          args: Prisma.BackgroundJobCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.BackgroundJobCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BackgroundJobPayload>[]
+        }
+        delete: {
+          args: Prisma.BackgroundJobDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BackgroundJobPayload>
+        }
+        update: {
+          args: Prisma.BackgroundJobUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BackgroundJobPayload>
+        }
+        deleteMany: {
+          args: Prisma.BackgroundJobDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.BackgroundJobUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.BackgroundJobUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BackgroundJobPayload>[]
+        }
+        upsert: {
+          args: Prisma.BackgroundJobUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BackgroundJobPayload>
+        }
+        aggregate: {
+          args: Prisma.BackgroundJobAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBackgroundJob>
+        }
+        groupBy: {
+          args: Prisma.BackgroundJobGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BackgroundJobGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.BackgroundJobCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BackgroundJobCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1270,6 +1345,7 @@ export const WorkspaceScalarFieldEnum = {
   description: 'description',
   icon: 'icon',
   defaultModel: 'defaultModel',
+  deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1286,6 +1362,8 @@ export const SourceScalarFieldEnum = {
   url: 'url',
   status: 'status',
   metadata: 'metadata',
+  deletedAt: 'deletedAt',
+  jobId: 'jobId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1312,6 +1390,7 @@ export const ConversationScalarFieldEnum = {
   title: 'title',
   summary: 'summary',
   summaryMessageCount: 'summaryMessageCount',
+  messageCount: 'messageCount',
   summarizedAt: 'summarizedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -1325,6 +1404,7 @@ export const MessageScalarFieldEnum = {
   conversationId: 'conversationId',
   role: 'role',
   content: 'content',
+  position: 'position',
   citations: 'citations',
   createdAt: 'createdAt'
 } as const
@@ -1341,11 +1421,35 @@ export const LearningArtifactScalarFieldEnum = {
   sourceIds: 'sourceIds',
   status: 'status',
   metadata: 'metadata',
+  jobId: 'jobId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type LearningArtifactScalarFieldEnum = (typeof LearningArtifactScalarFieldEnum)[keyof typeof LearningArtifactScalarFieldEnum]
+
+
+export const BackgroundJobScalarFieldEnum = {
+  id: 'id',
+  type: 'type',
+  resourceId: 'resourceId',
+  ownerId: 'ownerId',
+  workspaceId: 'workspaceId',
+  dedupeKey: 'dedupeKey',
+  status: 'status',
+  payload: 'payload',
+  deliveryGeneration: 'deliveryGeneration',
+  deliveryAttempts: 'deliveryAttempts',
+  processingAttempts: 'processingAttempts',
+  nextAttemptAt: 'nextAttemptAt',
+  leaseUntil: 'leaseUntil',
+  leaseToken: 'leaseToken',
+  lastError: 'lastError',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BackgroundJobScalarFieldEnum = (typeof BackgroundJobScalarFieldEnum)[keyof typeof BackgroundJobScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1362,6 +1466,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -1526,6 +1637,34 @@ export type EnumArtifactStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$P
  */
 export type ListEnumArtifactStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ArtifactStatus[]'>
     
+
+
+/**
+ * Reference to a field of type 'JobType'
+ */
+export type EnumJobTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'JobType'>
+
+
+
+/**
+ * Reference to a field of type 'JobType[]'
+ */
+export type ListEnumJobTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'JobType[]'>
+
+
+
+/**
+ * Reference to a field of type 'JobStatus'
+ */
+export type EnumJobStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'JobStatus'>
+
+
+
+/**
+ * Reference to a field of type 'JobStatus[]'
+ */
+export type ListEnumJobStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'JobStatus[]'>
+
 
 
 /**
@@ -1702,6 +1841,7 @@ export type GlobalOmitConfig = {
   conversation?: Prisma.ConversationOmit
   message?: Prisma.MessageOmit
   learningArtifact?: Prisma.LearningArtifactOmit
+  backgroundJob?: Prisma.BackgroundJobOmit
 }
 
 /* Types for Logging */

@@ -74,7 +74,7 @@ export async function uploadPdfToCloudinary(
 
   const response = await fetch(
     `https://api.cloudinary.com/v1_1/${cloudName}/raw/upload`,
-    { method: "POST", body: form },
+    { method: "POST", body: form, signal: AbortSignal.timeout(30000) },
   );
 
   const result = (await response.json()) as CloudinaryUploadResponse;
@@ -99,4 +99,33 @@ export async function uploadPdfToCloudinary(
     originalFilename: filename,
     resourceType: result.resource_type === "image" ? "image" : "raw",
   };
+}
+
+export async function deletePdfFromCloudinary(
+  publicId: string,
+  resourceType: "raw" | "image" = "raw",
+) {
+  if (!cloudName || !apiKey || !apiSecret)
+    throw new ValidationError("PDF cleanup is not configured");
+  const timestamp = Math.floor(Date.now() / 1000);
+  const signature = cloudinary.utils.api_sign_request(
+    { public_id: publicId, timestamp },
+    apiSecret,
+  );
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/destroy`,
+    {
+      method: "POST",
+      signal: AbortSignal.timeout(30000),
+      body: new URLSearchParams({
+        public_id: publicId,
+        api_key: apiKey,
+        timestamp: String(timestamp),
+        signature,
+      }),
+    },
+  );
+  const result = (await response.json()) as { result?: string };
+  if (!response.ok || !["ok", "not found"].includes(result.result ?? ""))
+    throw new Error("PDF cleanup failed");
 }

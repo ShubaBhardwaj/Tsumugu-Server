@@ -11,7 +11,7 @@ export async function scrapeWebsite(url: string) {
     throw new ValidationError("Firecrawl is not configured on the server");
   }
 
-  const client = new Firecrawl({ apiKey });
+  const client = new Firecrawl({ apiKey, timeoutMs: 30000 });
   const result = await client.scrape(url, {
     formats: ["markdown"],
   });

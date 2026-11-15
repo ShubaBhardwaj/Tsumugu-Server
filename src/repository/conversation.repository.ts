@@ -7,6 +7,7 @@ export const conversationSelect = {
   title: true,
   summary: true,
   summaryMessageCount: true,
+  messageCount: true,
   summarizedAt: true,
   createdAt: true,
   updatedAt: true,
@@ -18,7 +19,7 @@ export type ConversationRecord = Prisma.ConversationGetPayload<{
 
 export function findConversationsByWorkspaceId(workspaceId: string) {
   return prisma.conversation.findMany({
-    where: { workspaceId },
+    where: { workspaceId, workspace: { deletedAt: null } },
     select: conversationSelect,
     orderBy: { updatedAt: "desc" },
   });
@@ -36,7 +37,7 @@ export function findConversationByIdAndWorkspaceId(
   workspaceId: string,
 ) {
   return prisma.conversation.findFirst({
-    where: { id: conversationId, workspaceId },
+    where: { id: conversationId, workspaceId, workspace: { deletedAt: null } },
     select: conversationSelect,
   });
 }

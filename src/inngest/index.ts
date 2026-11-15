@@ -1,95 +1,21 @@
-import { findChunksBySourceId } from "../repository/source-chunk.repository.js";
-import { findSourceById } from "../repository/source.repository.js";
-import { processArtifactById } from "../services/artifact.services.js";
-import { summarizeConversationById } from "../services/conversation-memory.services.js";
-import {
-  chunkSourceContent,
-  embedAndIndexSource,
-  extractSourceContent,
-  markSourceFailed,
-  markSourceProcessing,
-} from "../services/source-processing.services.js";
+import { z } from "zod";
 import { inngest } from "./client.js";
-
-export const processSource = inngest.createFunction(
-  {
-    id: "process-source",
-    retries: 3,
-    triggers: [{ event: "source/created" }],
-  },
-  async ({ event, step }) => {
-    const { sourceId } = event.data;
-
-    await step.run("mark-processing", () => markSourceProcessing(sourceId));
-
-    try {
-      const extracted = await step.run("extract-content", () =>
-        extractSourceContent(sourceId),
-      );
-
-      await step.run("chunk-content", () =>
-        chunkSourceContent(sourceId, extracted.text, extracted.pages),
-      );
-
-      const result = await step.run("embed-and-index", async () => {
-        const source = await findSourceById(sourceId);
-        if (!source) {
-          throw new Error("Source not found");
-        }
-
-        const chunks = await findChunksBySourceId(sourceId);
-        await embedAndIndexSource(source, chunks);
-
-        return { chunkCount: chunks.length };
-      });
-
-      return { sourceId, status: "READY", ...result };
-    } catch (error) {
-      await step.run("mark-failed", async () => {
-        const source = await findSourceById(sourceId);
-        if (source) {
-          await markSourceFailed(sourceId, error, source.metadata);
-        }
-      });
-      throw error;
-    }
+import { recoverJobs, runJob } from "../services/job.services.js";
+export const processBackgroundJob = inngest.createFunction(
+  { id: "background-job", retries: 0, triggers: [{ event: "background/run" }] },
+  async ({ event }) => {
+    const data = z
+      .object({ jobId: z.string().min(1), generation: z.number().int().min(0) })
+      .parse(event.data);
+    await runJob(data.jobId, data.generation);
   },
 );
-
-export const summarizeConversation = inngest.createFunction(
+export const recoverBackgroundJobs = inngest.createFunction(
   {
-    id: "summarize-conversation",
+    id: "recover-background-jobs",
     retries: 2,
-    triggers: [{ event: "conversation/summarize" }],
+    triggers: [{ cron: "* * * * *" }],
   },
-  async ({ event, step }) => {
-    const { conversationId, userId } = event.data;
-
-    await step.run("summarize", () =>
-      summarizeConversationById(conversationId, userId),
-    );
-
-    return { conversationId, status: "SUMMARIZED" };
-  },
+  async () => ({ delivered: await recoverJobs() }),
 );
-
-export const generateArtifact = inngest.createFunction(
-  {
-    id: "generate-artifact",
-    retries: 2,
-    triggers: [{ event: "artifact/generate" }],
-  },
-  async ({ event, step }) => {
-    const { artifactId } = event.data;
-
-    await step.run("generate", () => processArtifactById(artifactId));
-
-    return { artifactId, status: "READY" };
-  },
-);
-
-export const functions = [
-  processSource,
-  summarizeConversation,
-  generateArtifact,
-];
+export const functions = [processBackgroundJob, recoverBackgroundJobs];

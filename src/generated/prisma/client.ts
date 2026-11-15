@@ -91,3 +91,8 @@ export type Message = Prisma.MessageModel
  * 
  */
 export type LearningArtifact = Prisma.LearningArtifactModel
+/**
+ * Model BackgroundJob
+ *
+ */
+export type BackgroundJob = Prisma.BackgroundJobModel

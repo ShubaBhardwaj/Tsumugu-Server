@@ -54,6 +54,19 @@ export function errorHandler(
     return;
   }
 
-  console.error(error);
+  const httpError = error as { status?: number; type?: string };
+  if (httpError.status === 413) {
+    res.status(413).json({ error: "Request exceeds 256 KiB" });
+    return;
+  }
+  if (httpError.type === "entity.parse.failed") {
+    res.status(400).json({ error: "Invalid JSON" });
+    return;
+  }
+  if (res.headersSent) {
+    res.end();
+    return;
+  }
+  console.error("Request failed");
   res.status(500).json({ error: "Internal server error" });
 }

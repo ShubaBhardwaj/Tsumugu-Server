@@ -1,6 +1,38 @@
 import { MemoryClient } from "mem0ai";
+import { AppError, NotFoundError } from "../types/app-error.js";
 
 let client: MemoryClient | null = null;
+
+export const memoryClientProvider = { get: getMem0Client };
+
+export function memoryOwner(record: unknown): string | undefined {
+  if (!record || typeof record !== "object") return undefined;
+  const value = record as { userId?: unknown; user_id?: unknown };
+  const owner = value.userId ?? value.user_id;
+  return typeof owner === "string" && owner.length > 0 ? owner : undefined;
+}
+
+export async function assertMemoryOwner(userId: string, memoryId: string) {
+  let memory: unknown;
+  try {
+    memory = await memoryClientProvider.get().get(memoryId);
+  } catch (error) {
+    const status =
+      (
+        error as {
+          status?: number;
+          statusCode?: number;
+          response?: { status?: number };
+        }
+      )?.status ??
+      (error as { statusCode?: number })?.statusCode ??
+      (error as { response?: { status?: number } })?.response?.status;
+    if (status === 404) throw new NotFoundError("Memory not found");
+    throw new AppError(503, "Memory service is temporarily unavailable");
+  }
+  if (memoryOwner(memory) !== userId)
+    throw new NotFoundError("Memory not found");
+}
 
 /**
  * Returns a singleton Mem0 API client.
@@ -45,7 +77,7 @@ export type AppMemory = {
  * @param record - Raw Mem0 memory object
  * @returns Normalized memory with `source` derived from metadata
  */
-function mapMemory(record: {
+export function mapMemory(record: {
   id: string;
   memory?: string;
   createdAt?: Date | string;
@@ -82,7 +114,7 @@ export async function listUserMemories(userId: string) {
     return [];
   }
 
-  const page = await getMem0Client().getAll({
+  const page = await memoryClientProvider.get().getAll({
     filters: { user_id: userId },
     page: 1,
     pageSize: 100,
@@ -104,7 +136,7 @@ export async function searchUserMemories(userId: string, query: string) {
     return [];
   }
 
-  const results = await getMem0Client().search(query, {
+  const results = await memoryClientProvider.get().search(query, {
     filters: { user_id: userId },
     topK: 8,
     threshold: 0.1,
@@ -130,14 +162,13 @@ export async function addUserMemory(
     metadata?: Record<string, unknown>;
   },
 ) {
-  const created = await getMem0Client().add(
-    [{ role: "user", content: input.memory }],
-    {
+  const created = await memoryClientProvider
+    .get()
+    .add([{ role: "user", content: input.memory }], {
       userId,
       infer: input.infer ?? false,
       metadata: input.metadata,
-    },
-  );
+    });
 
   const first = created[0];
   if (!first) {
@@ -165,7 +196,7 @@ export async function addMemoriesFromMessages(
     return;
   }
 
-  await getMem0Client().add(messages, {
+  await memoryClientProvider.get().add(messages, {
     userId,
     infer: true,
     metadata,
@@ -185,7 +216,7 @@ export async function updateUserMemory(
   memoryId: string,
   input: { memory: string },
 ) {
-  const updated = await getMem0Client().update(memoryId, {
+  const updated = await memoryClientProvider.get().update(memoryId, {
     text: input.memory,
   });
 
@@ -205,5 +236,5 @@ export async function updateUserMemory(
  *
  */
 export async function deleteUserMemory(memoryId: string) {
-  await getMem0Client().delete(memoryId);
+  await memoryClientProvider.get().delete(memoryId);
 }

@@ -1,6 +1,6 @@
 import { RAG_MIN_SCORE, RAG_TOP_K } from "../ai-config.js";
-import { embedTexts } from "../openai.js";
-import { queryWorkspaceVectors } from "../pinecone.js";
+import prisma from "../db.js";
+import { sourceProviders } from "../source-providers.js";
 
 export type RetrievedChunk = {
   sourceId: string;
@@ -17,13 +17,23 @@ export async function retrieveWorkspaceContext(
   workspaceId: string,
   query: string,
 ): Promise<RetrievedChunk[]> {
-  const [embedding] = await embedTexts([query]);
-  const matches = await queryWorkspaceVectors(
+  const [embedding] = await sourceProviders.embedTexts([query]);
+  const matches = await sourceProviders.queryWorkspaceVectors(
     workspaceId,
     embedding,
     RAG_TOP_K,
   );
 
+  const liveSources = await prisma.source.findMany({
+    where: {
+      workspaceId,
+      status: "READY",
+      deletedAt: null,
+      workspace: { deletedAt: null },
+    },
+    select: { id: true, jobId: true, metadata: true },
+  });
+  const live = new Map(liveSources.map((s) => [s.id, s]));
   const chunks: RetrievedChunk[] = [];
 
   for (const match of matches) {
@@ -44,6 +54,12 @@ export async function retrieveWorkspaceContext(
       continue;
     }
 
+    if (!live.has(metadata.sourceId)) continue;
+    const source = live.get(metadata.sourceId)!;
+    if (source.jobId && metadata.jobId !== source.jobId) continue;
+    const indexRun = (source.metadata as Record<string, unknown> | null)
+      ?.indexRun;
+    if (indexRun && metadata.runId !== indexRun) continue;
     chunks.push({
       sourceId: metadata.sourceId,
       sourceTitle: metadata.sourceTitle,

@@ -1,3 +1,11 @@
+import prisma from "../lib/db.js";
+import { aiProvider } from "../lib/ai-provider.js";
+import {
+  createJob,
+  workspaceTransaction,
+} from "../repository/job.repository.js";
+import { insertMessage } from "../repository/message.repository.js";
+import { kickJob } from "./job.services.js";
 import { openai } from "@ai-sdk/openai";
 import type { Response } from "express";
 import { z } from "zod";
@@ -6,7 +14,6 @@ import {
   createUIMessageStream,
   isStepCount,
   pipeUIMessageStreamToResponse,
-  streamText,
   toUIMessageStream,
   tool,
   type UIMessage,
@@ -17,7 +24,6 @@ import {
   CONVERSATION_SUMMARY_INTERVAL,
   RECENT_MESSAGE_WINDOW,
 } from "../lib/ai-config.js";
-import { enqueueConversationSummarize } from "../lib/conversation-events.js";
 import {
   buildChatSystemPrompt,
   retrieveWorkspaceContext,
@@ -26,15 +32,8 @@ import {
   createConversationRecord,
   findConversationByIdAndWorkspaceId,
   findConversationsByWorkspaceId,
-  touchConversation,
-  updateConversationRecord,
-  deleteConversationRecord,
 } from "../repository/conversation.repository.js";
-import {
-  createMessageRecord,
-  countMessagesByConversationId,
-  findMessagesByConversationId,
-} from "../repository/message.repository.js";
+import { findMessagesByConversationId } from "../repository/message.repository.js";
 
 import {
   formatTavilyResultsForPrompt,
@@ -48,7 +47,7 @@ import {
   getTextFromUIMessage,
 } from "../utils/chat-message.js";
 import { getWorkspaceByIdForUser } from "./workspace.services.js";
-import { addMemoriesFromMessages, searchUserMemories } from "../lib/mem0.js";
+import { searchUserMemories } from "../lib/mem0.js";
 
 /**
  * Lists all conversations in a workspace for the sidebar/history UI.
@@ -84,7 +83,28 @@ export async function createConversationForWorkspace(
   title?: string,
 ) {
   await getWorkspaceByIdForUser(workspaceId, userId);
-  return createConversationRecord(workspaceId, title);
+  return workspaceTransaction(workspaceId, async (tx) => {
+    if (
+      !(await tx.workspace.findFirst({
+        where: { id: workspaceId, userId, deletedAt: null },
+      }))
+    )
+      throw new NotFoundError("Workspace not found");
+    return tx.conversation.create({
+      data: { workspaceId, title: title ?? null },
+      select: {
+        id: true,
+        workspaceId: true,
+        title: true,
+        summary: true,
+        summaryMessageCount: true,
+        messageCount: true,
+        summarizedAt: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+  });
 }
 
 /**
@@ -142,7 +162,18 @@ export async function deleteConversationForWorkspace(
     throw new NotFoundError("Conversation not found");
   }
 
-  await deleteConversationRecord(conversationId);
+  await workspaceTransaction(workspaceId, async (tx) => {
+    await tx.backgroundJob.updateMany({
+      where: {
+        resourceId: conversationId,
+        status: { in: ["PENDING", "DISPATCHED", "RUNNING"] },
+      },
+      data: { status: "CANCELLED" },
+    });
+    await tx.conversation.deleteMany({
+      where: { id: conversationId, workspaceId },
+    });
+  });
 }
 
 /**
@@ -160,6 +191,7 @@ async function resolveConversation(
   workspaceId: string,
   conversationId: string | undefined,
   firstMessage: string,
+  userId: string,
 ) {
   if (conversationId) {
     const existing = await findConversationByIdAndWorkspaceId(
@@ -174,8 +206,9 @@ async function resolveConversation(
     return existing;
   }
 
-  return createConversationRecord(
+  return createConversationForWorkspace(
     workspaceId,
+    userId,
     buildConversationTitle(firstMessage),
   );
 }
@@ -200,6 +233,8 @@ async function resolveConversation(
  *
  *
  */
+export const chatModelProvider = { get: (model: string) => openai(model) };
+
 export async function streamWorkspaceChat(
   res: Response,
   workspaceId: string,
@@ -227,17 +262,29 @@ export async function streamWorkspaceChat(
     workspaceId,
     input.conversationId,
     userText,
+    userId,
   );
 
-  await createMessageRecord({
-    conversationId: conversation.id,
-    role: "USER",
-    content: userText,
+  const savedUser = await workspaceTransaction(workspaceId, async (tx) => {
+    if (
+      !(await tx.workspace.findFirst({
+        where: { id: workspaceId, userId, deletedAt: null },
+      }))
+    )
+      throw new NotFoundError("Workspace not found");
+    return insertMessage(tx, {
+      conversationId: conversation.id,
+      role: "USER",
+      content: userText,
+    });
   });
 
   const [retrievedChunks, userMemories] = await Promise.all([
     retrieveWorkspaceContext(workspaceId, userText),
-    searchUserMemories(userId, userText),
+    searchUserMemories(userId, userText).catch(() => {
+      console.error("Personal memory search unavailable");
+      return [];
+    }),
   ]);
 
   const citations = retrievedChunks.map((chunk) => ({
@@ -257,15 +304,32 @@ export async function streamWorkspaceChat(
     webSearchEnabled,
   });
 
-  const contextMessages =
-    conversation.summary && input.messages.length > RECENT_MESSAGE_WINDOW
-      ? input.messages.slice(-RECENT_MESSAGE_WINDOW)
-      : input.messages;
+  const history = await findMessagesByConversationId(conversation.id);
+  const contextMessages: UIMessage[] = history
+    .filter((message) => message.position <= savedUser.position)
+    .slice(-RECENT_MESSAGE_WINDOW)
+    .map((message) => ({
+      id: message.id,
+      role: message.role === "USER" ? "user" : "assistant",
+      parts: [{ type: "text", text: message.content }],
+    }));
+  if (res.destroyed) return;
+  const abort = new AbortController();
+  let generationFailed = false;
+  const disconnect = () => {
+    if (!res.writableEnded) abort.abort();
+  };
+  res.once("close", disconnect);
+  res.socket?.once("close", disconnect);
 
   let webSearchResults: TavilySearchResponse | null = null;
 
   const stream = createUIMessageStream({
     originalMessages: input.messages,
+    onError: () => {
+      generationFailed = true;
+      return "The answer could not be completed. Please retry.";
+    },
     execute: async ({ writer }) => {
       const tools = webSearchEnabled
         ? {
@@ -286,8 +350,13 @@ export async function streamWorkspaceChat(
           }
         : undefined;
 
-      const result = streamText({
-        model: openai(chatModel),
+      const result = aiProvider.streamText({
+        model: chatModelProvider.get(chatModel),
+        abortSignal: abort.signal,
+        maxOutputTokens: 1500,
+        onError: () => {
+          generationFailed = true;
+        },
         system: systemPrompt,
         messages: await convertToModelMessages(contextMessages),
         tools,
@@ -297,7 +366,7 @@ export async function streamWorkspaceChat(
       writer.merge(toUIMessageStream({ stream: result.stream }));
     },
     onFinish: async ({ responseMessage, isAborted }) => {
-      if (isAborted) {
+      if (isAborted || abort.signal.aborted || generationFailed) {
         return;
       }
 
@@ -316,43 +385,48 @@ export async function streamWorkspaceChat(
         : [];
       const allCitations = [...citations, ...webCitations];
 
-      await createMessageRecord({
-        conversationId: conversation.id,
-        role: "ASSISTANT",
-        content: assistantText,
-        citations: allCitations,
-      });
-
-      await touchConversation(conversation.id);
-
-      if (!conversation.title) {
-        await updateConversationRecord(conversation.id, {
-          title: buildConversationTitle(userText),
-        });
-      }
-
-      const messageCount = await countMessagesByConversationId(conversation.id);
-
-      if (messageCount % CONVERSATION_SUMMARY_INTERVAL === 0) {
-        await enqueueConversationSummarize({
+      const jobs = await workspaceTransaction(workspaceId, async (tx) => {
+        if (
+          !(await tx.workspace.findFirst({
+            where: { id: workspaceId, deletedAt: null, userId },
+          })) ||
+          !(await tx.conversation.findUnique({
+            where: { id: conversation.id },
+          }))
+        )
+          return [];
+        const assistant = await insertMessage(tx, {
           conversationId: conversation.id,
-          userId,
+          role: "ASSISTANT",
+          content: assistantText,
+          citations: allCitations,
         });
-      }
-
-      void addMemoriesFromMessages(
-        userId,
-        [
-          { role: "user", content: userText },
-          { role: "assistant", content: assistantText },
-        ],
-        {
-          source: "learned",
-          conversationId: conversation.id,
-        },
-      ).catch((error) => {
-        console.error("Mem0 add failed:", error);
+        const pending = [];
+        if (assistant.position % CONVERSATION_SUMMARY_INTERVAL === 0)
+          pending.push(
+            await createJob(tx, {
+              type: "SUMMARY",
+              resourceId: conversation.id,
+              ownerId: userId,
+              workspaceId,
+              dedupeKey: `summary:${conversation.id}:${assistant.position}`,
+            }),
+          );
+        if (process.env.MEM0_API_KEY?.trim()) {
+          pending.push(
+            await createJob(tx, {
+              type: "MEMORY",
+              resourceId: conversation.id,
+              ownerId: userId,
+              workspaceId,
+              dedupeKey: `memory:${assistant.id}`,
+              payload: { messageIds: [savedUser.id, assistant.id] },
+            }),
+          );
+        }
+        return pending;
       });
+      for (const job of jobs) kickJob(job.id);
     },
   });
 

@@ -1,7 +1,10 @@
-// import { deleteWorkspaceVectors } from "../lib/pinecone.js";
+import {
+  createJob,
+  workspaceTransaction,
+} from "../repository/job.repository.js";
+import { kickJob } from "./job.services.js";
 import {
   createWorkspaceRecord,
-  deleteWorkspaceRecord,
   findWorkspaceByIdAndUserId,
   findWorkspacesByUserId,
   updateWorkspaceRecord,
@@ -50,13 +53,35 @@ export async function deleteWorkspaceForUser(
   workspaceId: string,
   userId: string,
 ) {
-  await getWorkspaceByIdForUser(workspaceId, userId);
-
-  //   try {
-  //     await deleteWorkspaceVectors(workspaceId);
-  //   } catch (error) {
-  //     console.error("Failed to delete Pinecone namespace:", error);
-  //   }
-
-  await deleteWorkspaceRecord(workspaceId);
+  const job = await workspaceTransaction(workspaceId, async (tx) => {
+    const workspace = await tx.workspace.findFirst({
+      where: { id: workspaceId, userId, deletedAt: null },
+    });
+    if (!workspace) throw new NotFoundError("Workspace not found");
+    const sources = await tx.source.findMany({
+      where: { workspaceId },
+      select: { metadata: true },
+    });
+    await tx.workspace.update({
+      where: { id: workspaceId },
+      data: { deletedAt: new Date() },
+    });
+    await tx.backgroundJob.updateMany({
+      where: {
+        workspaceId,
+        status: { in: ["PENDING", "DISPATCHED", "RUNNING"] },
+        type: { notIn: ["SOURCE_CLEANUP", "WORKSPACE_CLEANUP"] },
+      },
+      data: { status: "CANCELLED" },
+    });
+    return createJob(tx, {
+      type: "WORKSPACE_CLEANUP",
+      resourceId: workspaceId,
+      workspaceId,
+      ownerId: userId,
+      dedupeKey: `delete:${workspaceId}`,
+      payload: { files: sources.map((s) => s.metadata ?? {}) },
+    });
+  });
+  kickJob(job.id);
 }

@@ -9,14 +9,17 @@ declare module "express-serve-static-core" {
   }
 }
 
+export const sessionProvider = {
+  get: (headers: Request["headers"]) =>
+    auth.api.getSession({ headers: fromNodeHeaders(headers) }),
+};
+
 export async function requireAuth(
   req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> {
-  const session = await auth.api.getSession({
-    headers: fromNodeHeaders(req.headers),
-  });
+  const session = await sessionProvider.get(req.headers);
 
   if (!session?.user) {
     res.status(401).json({ error: "Unauthorized" });

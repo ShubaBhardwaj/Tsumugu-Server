@@ -8,7 +8,7 @@ export type PdfExtractResult = {
 };
 
 async function downloadPdf(url: string) {
-  const response = await fetch(url);
+  const response = await fetch(url, { signal: AbortSignal.timeout(30000) });
 
   if (!response.ok) {
     throw new Error(`Failed to download PDF (${response.status})`);

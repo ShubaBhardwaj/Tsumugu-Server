@@ -60,7 +60,8 @@ export const ModelName = {
   SourceChunk: 'SourceChunk',
   Conversation: 'Conversation',
   Message: 'Message',
-  LearningArtifact: 'LearningArtifact'
+  LearningArtifact: 'LearningArtifact',
+  BackgroundJob: 'BackgroundJob'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -144,6 +145,7 @@ export const WorkspaceScalarFieldEnum = {
   description: 'description',
   icon: 'icon',
   defaultModel: 'defaultModel',
+  deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -160,6 +162,8 @@ export const SourceScalarFieldEnum = {
   url: 'url',
   status: 'status',
   metadata: 'metadata',
+  deletedAt: 'deletedAt',
+  jobId: 'jobId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -186,6 +190,7 @@ export const ConversationScalarFieldEnum = {
   title: 'title',
   summary: 'summary',
   summaryMessageCount: 'summaryMessageCount',
+  messageCount: 'messageCount',
   summarizedAt: 'summarizedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -199,6 +204,7 @@ export const MessageScalarFieldEnum = {
   conversationId: 'conversationId',
   role: 'role',
   content: 'content',
+  position: 'position',
   citations: 'citations',
   createdAt: 'createdAt'
 } as const
@@ -215,11 +221,35 @@ export const LearningArtifactScalarFieldEnum = {
   sourceIds: 'sourceIds',
   status: 'status',
   metadata: 'metadata',
+  jobId: 'jobId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type LearningArtifactScalarFieldEnum = (typeof LearningArtifactScalarFieldEnum)[keyof typeof LearningArtifactScalarFieldEnum]
+
+
+export const BackgroundJobScalarFieldEnum = {
+  id: 'id',
+  type: 'type',
+  resourceId: 'resourceId',
+  ownerId: 'ownerId',
+  workspaceId: 'workspaceId',
+  dedupeKey: 'dedupeKey',
+  status: 'status',
+  payload: 'payload',
+  deliveryGeneration: 'deliveryGeneration',
+  deliveryAttempts: 'deliveryAttempts',
+  processingAttempts: 'processingAttempts',
+  nextAttemptAt: 'nextAttemptAt',
+  leaseUntil: 'leaseUntil',
+  leaseToken: 'leaseToken',
+  lastError: 'lastError',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BackgroundJobScalarFieldEnum = (typeof BackgroundJobScalarFieldEnum)[keyof typeof BackgroundJobScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -236,6 +266,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {

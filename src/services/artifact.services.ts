@@ -1,30 +1,21 @@
 import type { Prisma } from "../generated/prisma/client.js";
-import { enqueueArtifactGeneration } from "../lib/artifact-events.js";
 import {
-  createArtifactRecord,
-  deleteArtifactRecord,
-  findArtifactById,
   findArtifactByIdAndWorkspaceId,
   findArtifactsByWorkspaceId,
-  updateArtifactRecord,
-  type ArtifactRecord,
 } from "../repository/artifact.repository.js";
+import {
+  createJob,
+  workspaceTransaction,
+} from "../repository/job.repository.js";
 import { NotFoundError } from "../types/app-error.js";
 import {
   gatherSourceContext,
-  generateArtifactContent,
+  artifactGenerator,
+  validateArtifactContent,
 } from "./artifact-generation.services.js";
 import { getWorkspaceByIdForUser } from "./workspace.services.js";
 import type { CreateArtifactInput } from "../validators/artifact.validator.js";
-
-/**
- * Lists all learning artifacts in a workspace.
- *
- * @param workspaceId - Workspace to list artifacts from
- * @param userId - Authenticated user's id
- * @returns Artifact records ordered by creation time
- *
- */
+import { kickJob, retryJobForUser, type JobContext } from "./job.services.js";
 export async function listArtifactsForWorkspace(
   workspaceId: string,
   userId: string,
@@ -32,157 +23,129 @@ export async function listArtifactsForWorkspace(
   await getWorkspaceByIdForUser(workspaceId, userId);
   return findArtifactsByWorkspaceId(workspaceId);
 }
-
-/**
- * Loads a single artifact after verifying workspace ownership.
- *
- * @param workspaceId - Workspace the artifact belongs to
- * @param artifactId - Artifact to fetch
- * @param userId - Authenticated user's id
- * @returns Artifact record with content when status is `READY`
- * @throws {NotFoundError} When the artifact does not exist in this workspace
- *
- */
 export async function getArtifactForWorkspace(
   workspaceId: string,
   artifactId: string,
   userId: string,
 ) {
   await getWorkspaceByIdForUser(workspaceId, userId);
-
   const artifact = await findArtifactByIdAndWorkspaceId(
     artifactId,
     workspaceId,
   );
-
-  if (!artifact) {
-    throw new NotFoundError("Artifact not found");
-  }
-
+  if (!artifact) throw new NotFoundError("Artifact not found");
   return artifact;
 }
-
-/**
- * Creates a pending artifact and enqueues background generation via Inngest.
- *
- * Validates that ready sources exist before creating the row. The actual AI
- * generation runs asynchronously in {@link processArtifactById}.
- *
- * @param workspaceId - Workspace to attach the artifact to
- * @param userId - Authenticated user's id
- * @param input - Artifact type, optional title, optional source id filter
- * @returns New artifact with status `PENDING`
- * @throws {ValidationError} When no ready sources are available
- *
- */
 export async function createArtifactForWorkspace(
   workspaceId: string,
   userId: string,
   input: CreateArtifactInput,
 ) {
   await getWorkspaceByIdForUser(workspaceId, userId);
-
   const context = await gatherSourceContext(workspaceId, input.sourceIds);
-
-  const artifact = await createArtifactRecord({
-    workspaceId,
-    type: input.type,
-    title:
-      input.title ||
-      `${
-        {
-          SUMMARY: "Summary",
-          TAKEAWAYS: "Key Takeaways",
-          FLASHCARDS: "Flashcards",
-          QUIZ: "Quiz",
-          MINDMAP: "Mind Map",
-          REPORT: "AI Report",
-        }[input.type]
-      } · ${new Date().toLocaleDateString()}`,
-    sourceIds: context.sourceIds,
-    status: "PENDING",
+  const artifact = await workspaceTransaction(workspaceId, async (tx) => {
+    if (
+      !(await tx.workspace.findFirst({
+        where: { id: workspaceId, userId, deletedAt: null },
+      }))
+    )
+      throw new NotFoundError("Workspace not found");
+    // Freeze the validated selection; the worker rechecks readiness and availability.
+    const row = await tx.learningArtifact.create({
+      data: {
+        workspaceId,
+        type: input.type,
+        title: input.title || input.type,
+        sourceIds: input.sourceIds ?? context.selectedSourceIds,
+      },
+    });
+    const job = await createJob(tx, {
+      type: "ARTIFACT",
+      ownerId: userId,
+      workspaceId,
+      resourceId: row.id,
+    });
+    return tx.learningArtifact.update({
+      where: { id: row.id },
+      data: { jobId: job.id },
+    });
   });
-
-  await enqueueArtifactGeneration({
-    artifactId: artifact.id,
-    workspaceId,
-  });
-
+  kickJob(artifact.jobId!);
   return artifact;
 }
-
-/**
- * Deletes an artifact from the workspace.
- *
- * @param workspaceId - Workspace the artifact belongs to
- * @param artifactId - Artifact to delete
- * @param userId - Authenticated user's id
- * @returns Resolves when the artifact row is deleted
- * @throws {NotFoundError} When the artifact is not found
- *
- */
 export async function deleteArtifactForWorkspace(
   workspaceId: string,
   artifactId: string,
   userId: string,
 ) {
   await getArtifactForWorkspace(workspaceId, artifactId, userId);
-  await deleteArtifactRecord(artifactId);
+  await workspaceTransaction(workspaceId, async (tx) => {
+    await tx.backgroundJob.updateMany({
+      where: {
+        resourceId: artifactId,
+        status: { in: ["PENDING", "DISPATCHED", "RUNNING"] },
+      },
+      data: { status: "CANCELLED" },
+    });
+    await tx.learningArtifact.deleteMany({
+      where: { id: artifactId, workspaceId },
+    });
+  });
 }
-
-/**
- * Runs the full artifact generation pipeline (used by Inngest worker).
- *
- * ```
- * status: PROCESSING
- *   → gatherSourceContext
- *   → generateArtifactContent
- *   → status: READY (or FAILED on error)
- * ```
- *
- * @param artifactId - Artifact to generate content for
- * @returns Updated artifact with `READY` status and generated content
- * @throws When the artifact is missing or generation fails (status set to `FAILED`)
- *
- *
- */
-export async function processArtifactById(artifactId: string) {
-  const artifact = await findArtifactById(artifactId);
-  if (!artifact) {
-    throw new Error("Artifact not found");
-  }
-
-  await updateArtifactRecord(artifactId, { status: "PROCESSING" });
-
-  try {
-    const context = await gatherSourceContext(
-      artifact.workspaceId,
-      artifact.sourceIds,
-    );
-
-    const content = await generateArtifactContent(artifact.type, context.text);
-
-    return updateArtifactRecord(artifactId, {
-      status: "READY",
-      content: content as Prisma.InputJsonValue,
-      metadata: {
-        generatedAt: new Date().toISOString(),
-        processingError: undefined,
+export async function retryArtifact(
+  workspaceId: string,
+  artifactId: string,
+  userId: string,
+) {
+  const artifact = await getArtifactForWorkspace(
+    workspaceId,
+    artifactId,
+    userId,
+  );
+  if (!artifact.jobId) throw new NotFoundError("Artifact job not found");
+  return retryJobForUser(artifact.jobId, userId);
+}
+export async function processArtifactJob(ctx: JobContext) {
+  const artifact = await ctx.commit((tx) =>
+    tx.learningArtifact.update({
+      where: { id: ctx.job.resourceId },
+      data: { status: "PROCESSING" },
+    }),
+  );
+  const context = await gatherSourceContext(
+    artifact.workspaceId,
+    artifact.sourceIds,
+  );
+  await ctx.check();
+  const content = validateArtifactContent(
+    artifact.type,
+    await artifactGenerator.generate(artifact.type, context.text),
+  );
+  await ctx.commit(async (tx) => {
+    const valid = await tx.source.count({
+      where: {
+        id: { in: context.sourceIds },
+        workspaceId: artifact.workspaceId,
+        deletedAt: null,
+        status: "READY",
       },
     });
-  } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Artifact generation failed";
-
-    await updateArtifactRecord(artifactId, {
-      status: "FAILED",
-      metadata: {
-        processingError: message,
+    if (valid !== context.sourceIds.length)
+      throw new NotFoundError(
+        "Selected source became unavailable during generation",
+      );
+    return tx.learningArtifact.update({
+      where: { id: artifact.id },
+      data: {
+        status: "READY",
+        content: content as Prisma.InputJsonValue,
+        sourceIds: context.sourceIds,
+        metadata: {
+          generatedAt: new Date().toISOString(),
+          truncated: context.truncated,
+          truncatedSources: context.truncatedSources,
+        },
       },
     });
-
-    throw error;
-  }
+  });
 }
-
-export type { ArtifactRecord };

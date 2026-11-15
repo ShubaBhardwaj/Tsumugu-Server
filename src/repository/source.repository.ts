@@ -11,6 +11,8 @@ export const sourceSelect = {
   url: true,
   status: true,
   metadata: true,
+  jobId: true,
+  deletedAt: true,
   createdAt: true,
   updatedAt: true,
 } as const;
@@ -48,7 +50,11 @@ export function findSourcesByWorkspaceId(
   workspaceId: string,
   filters: ListSourcesQuery = {},
 ) {
-  const where: Prisma.SourceWhereInput = { workspaceId };
+  const where: Prisma.SourceWhereInput = {
+    workspaceId,
+    deletedAt: null,
+    workspace: { deletedAt: null },
+  };
 
   if (filters.type) {
     where.type = filters.type;
@@ -77,7 +83,12 @@ export function findSourceByIdAndWorkspaceId(
   workspaceId: string,
 ) {
   return prisma.source.findFirst({
-    where: { id: sourceId, workspaceId },
+    where: {
+      id: sourceId,
+      workspaceId,
+      deletedAt: null,
+      workspace: { deletedAt: null },
+    },
     select: sourceSelect,
   });
 }

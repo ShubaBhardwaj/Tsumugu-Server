@@ -1,39 +1,16 @@
-import express from "express";
-import dotenv from "dotenv";
-import { auth } from "./lib/auth.js";
-import cors from "cors";
-import { errorHandler } from "./middleware/error-handler.middleware.js";
-import { toNodeHandler } from "better-auth/node";
-import { registerRoutes } from "./routes/index.js";
-import { inngest } from "./inngest/client.js";
-import { serve } from "inngest/express";
-import { functions } from "./inngest/index.js";
+import "dotenv/config";
+import { createApp } from "./app.js";
+import { readServerConfig } from "./lib/config.js";
+import { reconcileLegacyJobs } from "./services/job-recovery.services.js";
 
-dotenv.config();
-const app = express();
-const clientUrl = process.env.CLIENT_URL ?? "http://localhost:3001";
+const config = readServerConfig();
 
-app.use(
-  cors({
-    origin: clientUrl,
-    credentials: true,
-  }),
-);
+createApp().listen(config.port, () => {
+  console.log(`Server is running on port ${config.port}`);
 
-app.all("/api/auth/{*any}", toNodeHandler(auth));
-
-app.use(express.json());
-
-app.use("/api/inngest", serve({ client: inngest, functions }));
-
-app.get("/", (req, res) => {
-  res.send("Hello, World!");
-});
-
-registerRoutes(app);
-
-app.use(errorHandler);
-
-app.listen(process.env.PORT || 8080, () => {
-  console.log("Server is running on http://localhost:8080");
+  void reconcileLegacyJobs().catch(() =>
+    console.error(
+      "Startup recovery failed; run jobs:recover after checking database migrations",
+    ),
+  );
 });

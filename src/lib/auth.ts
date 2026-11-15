@@ -1,9 +1,10 @@
 import "dotenv/config";
+import { frontendOrigin } from "./config.js";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import prisma from "./db.js"; // your prisma client instance
 
-const clientUrl = process.env.BETTER_AUTH_URL || `http://localhost:3000`; // Base URL of your app
+const clientUrl = frontendOrigin();
 
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL,

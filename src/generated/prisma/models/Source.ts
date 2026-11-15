@@ -32,6 +32,8 @@ export type SourceMinAggregateOutputType = {
   content: string | null
   url: string | null
   status: $Enums.SourceStatus | null
+  deletedAt: Date | null
+  jobId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -44,6 +46,8 @@ export type SourceMaxAggregateOutputType = {
   content: string | null
   url: string | null
   status: $Enums.SourceStatus | null
+  deletedAt: Date | null
+  jobId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -57,6 +61,8 @@ export type SourceCountAggregateOutputType = {
   url: number
   status: number
   metadata: number
+  deletedAt: number
+  jobId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -71,6 +77,8 @@ export type SourceMinAggregateInputType = {
   content?: true
   url?: true
   status?: true
+  deletedAt?: true
+  jobId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -83,6 +91,8 @@ export type SourceMaxAggregateInputType = {
   content?: true
   url?: true
   status?: true
+  deletedAt?: true
+  jobId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -96,6 +106,8 @@ export type SourceCountAggregateInputType = {
   url?: true
   status?: true
   metadata?: true
+  deletedAt?: true
+  jobId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -182,6 +194,8 @@ export type SourceGroupByOutputType = {
   url: string | null
   status: $Enums.SourceStatus
   metadata: runtime.JsonValue | null
+  deletedAt: Date | null
+  jobId: string | null
   createdAt: Date
   updatedAt: Date
   _count: SourceCountAggregateOutputType | null
@@ -216,6 +230,8 @@ export type SourceWhereInput = {
   url?: Prisma.StringNullableFilter<"Source"> | string | null
   status?: Prisma.EnumSourceStatusFilter<"Source"> | $Enums.SourceStatus
   metadata?: Prisma.JsonNullableFilter<"Source">
+  deletedAt?: Prisma.DateTimeNullableFilter<"Source"> | Date | string | null
+  jobId?: Prisma.StringNullableFilter<"Source"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Source"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Source"> | Date | string
   workspace?: Prisma.XOR<Prisma.WorkspaceScalarRelationFilter, Prisma.WorkspaceWhereInput>
@@ -231,6 +247,8 @@ export type SourceOrderByWithRelationInput = {
   url?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  jobId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   workspace?: Prisma.WorkspaceOrderByWithRelationInput
@@ -249,6 +267,8 @@ export type SourceWhereUniqueInput = Prisma.AtLeast<{
   url?: Prisma.StringNullableFilter<"Source"> | string | null
   status?: Prisma.EnumSourceStatusFilter<"Source"> | $Enums.SourceStatus
   metadata?: Prisma.JsonNullableFilter<"Source">
+  deletedAt?: Prisma.DateTimeNullableFilter<"Source"> | Date | string | null
+  jobId?: Prisma.StringNullableFilter<"Source"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Source"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Source"> | Date | string
   workspace?: Prisma.XOR<Prisma.WorkspaceScalarRelationFilter, Prisma.WorkspaceWhereInput>
@@ -264,6 +284,8 @@ export type SourceOrderByWithAggregationInput = {
   url?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  jobId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.SourceCountOrderByAggregateInput
@@ -283,6 +305,8 @@ export type SourceScalarWhereWithAggregatesInput = {
   url?: Prisma.StringNullableWithAggregatesFilter<"Source"> | string | null
   status?: Prisma.EnumSourceStatusWithAggregatesFilter<"Source"> | $Enums.SourceStatus
   metadata?: Prisma.JsonNullableWithAggregatesFilter<"Source">
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Source"> | Date | string | null
+  jobId?: Prisma.StringNullableWithAggregatesFilter<"Source"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Source"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Source"> | Date | string
 }
@@ -295,6 +319,8 @@ export type SourceCreateInput = {
   url?: string | null
   status?: $Enums.SourceStatus
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
+  jobId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   workspace: Prisma.WorkspaceCreateNestedOneWithoutSourcesInput
@@ -310,6 +336,8 @@ export type SourceUncheckedCreateInput = {
   url?: string | null
   status?: $Enums.SourceStatus
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
+  jobId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   chunks?: Prisma.SourceChunkUncheckedCreateNestedManyWithoutSourceInput
@@ -323,6 +351,8 @@ export type SourceUpdateInput = {
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSourceStatusFieldUpdateOperationsInput | $Enums.SourceStatus
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  jobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   workspace?: Prisma.WorkspaceUpdateOneRequiredWithoutSourcesNestedInput
@@ -338,6 +368,8 @@ export type SourceUncheckedUpdateInput = {
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSourceStatusFieldUpdateOperationsInput | $Enums.SourceStatus
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  jobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   chunks?: Prisma.SourceChunkUncheckedUpdateManyWithoutSourceNestedInput
@@ -352,6 +384,8 @@ export type SourceCreateManyInput = {
   url?: string | null
   status?: $Enums.SourceStatus
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
+  jobId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -364,6 +398,8 @@ export type SourceUpdateManyMutationInput = {
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSourceStatusFieldUpdateOperationsInput | $Enums.SourceStatus
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  jobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -377,6 +413,8 @@ export type SourceUncheckedUpdateManyInput = {
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSourceStatusFieldUpdateOperationsInput | $Enums.SourceStatus
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  jobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -400,6 +438,8 @@ export type SourceCountOrderByAggregateInput = {
   url?: Prisma.SortOrder
   status?: Prisma.SortOrder
   metadata?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  jobId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -412,6 +452,8 @@ export type SourceMaxOrderByAggregateInput = {
   content?: Prisma.SortOrder
   url?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  jobId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -424,6 +466,8 @@ export type SourceMinOrderByAggregateInput = {
   content?: Prisma.SortOrder
   url?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+  jobId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -505,6 +549,8 @@ export type SourceCreateWithoutWorkspaceInput = {
   url?: string | null
   status?: $Enums.SourceStatus
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
+  jobId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   chunks?: Prisma.SourceChunkCreateNestedManyWithoutSourceInput
@@ -518,6 +564,8 @@ export type SourceUncheckedCreateWithoutWorkspaceInput = {
   url?: string | null
   status?: $Enums.SourceStatus
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
+  jobId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   chunks?: Prisma.SourceChunkUncheckedCreateNestedManyWithoutSourceInput
@@ -561,6 +609,8 @@ export type SourceScalarWhereInput = {
   url?: Prisma.StringNullableFilter<"Source"> | string | null
   status?: Prisma.EnumSourceStatusFilter<"Source"> | $Enums.SourceStatus
   metadata?: Prisma.JsonNullableFilter<"Source">
+  deletedAt?: Prisma.DateTimeNullableFilter<"Source"> | Date | string | null
+  jobId?: Prisma.StringNullableFilter<"Source"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Source"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Source"> | Date | string
 }
@@ -573,6 +623,8 @@ export type SourceCreateWithoutChunksInput = {
   url?: string | null
   status?: $Enums.SourceStatus
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
+  jobId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   workspace: Prisma.WorkspaceCreateNestedOneWithoutSourcesInput
@@ -587,6 +639,8 @@ export type SourceUncheckedCreateWithoutChunksInput = {
   url?: string | null
   status?: $Enums.SourceStatus
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
+  jobId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -615,6 +669,8 @@ export type SourceUpdateWithoutChunksInput = {
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSourceStatusFieldUpdateOperationsInput | $Enums.SourceStatus
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  jobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   workspace?: Prisma.WorkspaceUpdateOneRequiredWithoutSourcesNestedInput
@@ -629,6 +685,8 @@ export type SourceUncheckedUpdateWithoutChunksInput = {
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSourceStatusFieldUpdateOperationsInput | $Enums.SourceStatus
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  jobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -641,6 +699,8 @@ export type SourceCreateManyWorkspaceInput = {
   url?: string | null
   status?: $Enums.SourceStatus
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
+  jobId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -653,6 +713,8 @@ export type SourceUpdateWithoutWorkspaceInput = {
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSourceStatusFieldUpdateOperationsInput | $Enums.SourceStatus
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  jobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   chunks?: Prisma.SourceChunkUpdateManyWithoutSourceNestedInput
@@ -666,6 +728,8 @@ export type SourceUncheckedUpdateWithoutWorkspaceInput = {
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSourceStatusFieldUpdateOperationsInput | $Enums.SourceStatus
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  jobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   chunks?: Prisma.SourceChunkUncheckedUpdateManyWithoutSourceNestedInput
@@ -679,6 +743,8 @@ export type SourceUncheckedUpdateManyWithoutWorkspaceInput = {
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSourceStatusFieldUpdateOperationsInput | $Enums.SourceStatus
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  jobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -723,6 +789,8 @@ export type SourceSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   url?: boolean
   status?: boolean
   metadata?: boolean
+  deletedAt?: boolean
+  jobId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   workspace?: boolean | Prisma.WorkspaceDefaultArgs<ExtArgs>
@@ -739,6 +807,8 @@ export type SourceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   url?: boolean
   status?: boolean
   metadata?: boolean
+  deletedAt?: boolean
+  jobId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   workspace?: boolean | Prisma.WorkspaceDefaultArgs<ExtArgs>
@@ -753,6 +823,8 @@ export type SourceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   url?: boolean
   status?: boolean
   metadata?: boolean
+  deletedAt?: boolean
+  jobId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   workspace?: boolean | Prisma.WorkspaceDefaultArgs<ExtArgs>
@@ -767,11 +839,13 @@ export type SourceSelectScalar = {
   url?: boolean
   status?: boolean
   metadata?: boolean
+  deletedAt?: boolean
+  jobId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type SourceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "workspaceId" | "type" | "title" | "content" | "url" | "status" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["source"]>
+export type SourceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "workspaceId" | "type" | "title" | "content" | "url" | "status" | "metadata" | "deletedAt" | "jobId" | "createdAt" | "updatedAt", ExtArgs["result"]["source"]>
 export type SourceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   workspace?: boolean | Prisma.WorkspaceDefaultArgs<ExtArgs>
   chunks?: boolean | Prisma.Source$chunksArgs<ExtArgs>
@@ -799,6 +873,8 @@ export type $SourcePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     url: string | null
     status: $Enums.SourceStatus
     metadata: runtime.JsonValue | null
+    deletedAt: Date | null
+    jobId: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["source"]>
@@ -1234,6 +1310,8 @@ export interface SourceFieldRefs {
   readonly url: Prisma.FieldRef<"Source", 'String'>
   readonly status: Prisma.FieldRef<"Source", 'SourceStatus'>
   readonly metadata: Prisma.FieldRef<"Source", 'Json'>
+  readonly deletedAt: Prisma.FieldRef<"Source", 'DateTime'>
+  readonly jobId: Prisma.FieldRef<"Source", 'String'>
   readonly createdAt: Prisma.FieldRef<"Source", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Source", 'DateTime'>
 }

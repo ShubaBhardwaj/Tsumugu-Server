@@ -26,7 +26,7 @@ export type WorkspaceRecord = {
 
 export function findWorkspacesByUserId(userId: string) {
   return prisma.workspace.findMany({
-    where: { userId },
+    where: { userId, deletedAt: null },
     select: workspaceSelect,
     orderBy: { updatedAt: "desc" },
   });
@@ -37,7 +37,7 @@ export function findWorkspaceByIdAndUserId(
   userId: string,
 ) {
   return prisma.workspace.findFirst({
-    where: { id: workspaceId, userId },
+    where: { id: workspaceId, userId, deletedAt: null },
     select: workspaceSelect,
   });
 }

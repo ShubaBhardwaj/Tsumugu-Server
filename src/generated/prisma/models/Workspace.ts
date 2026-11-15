@@ -31,6 +31,7 @@ export type WorkspaceMinAggregateOutputType = {
   description: string | null
   icon: string | null
   defaultModel: string | null
+  deletedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -42,6 +43,7 @@ export type WorkspaceMaxAggregateOutputType = {
   description: string | null
   icon: string | null
   defaultModel: string | null
+  deletedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -53,6 +55,7 @@ export type WorkspaceCountAggregateOutputType = {
   description: number
   icon: number
   defaultModel: number
+  deletedAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -66,6 +69,7 @@ export type WorkspaceMinAggregateInputType = {
   description?: true
   icon?: true
   defaultModel?: true
+  deletedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -77,6 +81,7 @@ export type WorkspaceMaxAggregateInputType = {
   description?: true
   icon?: true
   defaultModel?: true
+  deletedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -88,6 +93,7 @@ export type WorkspaceCountAggregateInputType = {
   description?: true
   icon?: true
   defaultModel?: true
+  deletedAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -172,6 +178,7 @@ export type WorkspaceGroupByOutputType = {
   description: string | null
   icon: string | null
   defaultModel: string
+  deletedAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: WorkspaceCountAggregateOutputType | null
@@ -204,6 +211,7 @@ export type WorkspaceWhereInput = {
   description?: Prisma.StringNullableFilter<"Workspace"> | string | null
   icon?: Prisma.StringNullableFilter<"Workspace"> | string | null
   defaultModel?: Prisma.StringFilter<"Workspace"> | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"Workspace"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Workspace"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Workspace"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -219,6 +227,7 @@ export type WorkspaceOrderByWithRelationInput = {
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   icon?: Prisma.SortOrderInput | Prisma.SortOrder
   defaultModel?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
@@ -237,6 +246,7 @@ export type WorkspaceWhereUniqueInput = Prisma.AtLeast<{
   description?: Prisma.StringNullableFilter<"Workspace"> | string | null
   icon?: Prisma.StringNullableFilter<"Workspace"> | string | null
   defaultModel?: Prisma.StringFilter<"Workspace"> | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"Workspace"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Workspace"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Workspace"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -252,6 +262,7 @@ export type WorkspaceOrderByWithAggregationInput = {
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   icon?: Prisma.SortOrderInput | Prisma.SortOrder
   defaultModel?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.WorkspaceCountOrderByAggregateInput
@@ -269,6 +280,7 @@ export type WorkspaceScalarWhereWithAggregatesInput = {
   description?: Prisma.StringNullableWithAggregatesFilter<"Workspace"> | string | null
   icon?: Prisma.StringNullableWithAggregatesFilter<"Workspace"> | string | null
   defaultModel?: Prisma.StringWithAggregatesFilter<"Workspace"> | string
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Workspace"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Workspace"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Workspace"> | Date | string
 }
@@ -279,6 +291,7 @@ export type WorkspaceCreateInput = {
   description?: string | null
   icon?: string | null
   defaultModel?: string
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutWorkspacesInput
@@ -294,6 +307,7 @@ export type WorkspaceUncheckedCreateInput = {
   description?: string | null
   icon?: string | null
   defaultModel?: string
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sources?: Prisma.SourceUncheckedCreateNestedManyWithoutWorkspaceInput
@@ -307,6 +321,7 @@ export type WorkspaceUpdateInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   defaultModel?: Prisma.StringFieldUpdateOperationsInput | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutWorkspacesNestedInput
@@ -322,6 +337,7 @@ export type WorkspaceUncheckedUpdateInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   defaultModel?: Prisma.StringFieldUpdateOperationsInput | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sources?: Prisma.SourceUncheckedUpdateManyWithoutWorkspaceNestedInput
@@ -336,6 +352,7 @@ export type WorkspaceCreateManyInput = {
   description?: string | null
   icon?: string | null
   defaultModel?: string
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -346,6 +363,7 @@ export type WorkspaceUpdateManyMutationInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   defaultModel?: Prisma.StringFieldUpdateOperationsInput | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -357,6 +375,7 @@ export type WorkspaceUncheckedUpdateManyInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   defaultModel?: Prisma.StringFieldUpdateOperationsInput | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -378,6 +397,7 @@ export type WorkspaceCountOrderByAggregateInput = {
   description?: Prisma.SortOrder
   icon?: Prisma.SortOrder
   defaultModel?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -389,6 +409,7 @@ export type WorkspaceMaxOrderByAggregateInput = {
   description?: Prisma.SortOrder
   icon?: Prisma.SortOrder
   defaultModel?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -400,6 +421,7 @@ export type WorkspaceMinOrderByAggregateInput = {
   description?: Prisma.SortOrder
   icon?: Prisma.SortOrder
   defaultModel?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -499,6 +521,7 @@ export type WorkspaceCreateWithoutUserInput = {
   description?: string | null
   icon?: string | null
   defaultModel?: string
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sources?: Prisma.SourceCreateNestedManyWithoutWorkspaceInput
@@ -512,6 +535,7 @@ export type WorkspaceUncheckedCreateWithoutUserInput = {
   description?: string | null
   icon?: string | null
   defaultModel?: string
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sources?: Prisma.SourceUncheckedCreateNestedManyWithoutWorkspaceInput
@@ -555,6 +579,7 @@ export type WorkspaceScalarWhereInput = {
   description?: Prisma.StringNullableFilter<"Workspace"> | string | null
   icon?: Prisma.StringNullableFilter<"Workspace"> | string | null
   defaultModel?: Prisma.StringFilter<"Workspace"> | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"Workspace"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Workspace"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Workspace"> | Date | string
 }
@@ -565,6 +590,7 @@ export type WorkspaceCreateWithoutSourcesInput = {
   description?: string | null
   icon?: string | null
   defaultModel?: string
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutWorkspacesInput
@@ -579,6 +605,7 @@ export type WorkspaceUncheckedCreateWithoutSourcesInput = {
   description?: string | null
   icon?: string | null
   defaultModel?: string
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutWorkspaceInput
@@ -607,6 +634,7 @@ export type WorkspaceUpdateWithoutSourcesInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   defaultModel?: Prisma.StringFieldUpdateOperationsInput | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutWorkspacesNestedInput
@@ -621,6 +649,7 @@ export type WorkspaceUncheckedUpdateWithoutSourcesInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   defaultModel?: Prisma.StringFieldUpdateOperationsInput | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutWorkspaceNestedInput
@@ -633,6 +662,7 @@ export type WorkspaceCreateWithoutConversationsInput = {
   description?: string | null
   icon?: string | null
   defaultModel?: string
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutWorkspacesInput
@@ -647,6 +677,7 @@ export type WorkspaceUncheckedCreateWithoutConversationsInput = {
   description?: string | null
   icon?: string | null
   defaultModel?: string
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sources?: Prisma.SourceUncheckedCreateNestedManyWithoutWorkspaceInput
@@ -675,6 +706,7 @@ export type WorkspaceUpdateWithoutConversationsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   defaultModel?: Prisma.StringFieldUpdateOperationsInput | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutWorkspacesNestedInput
@@ -689,6 +721,7 @@ export type WorkspaceUncheckedUpdateWithoutConversationsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   defaultModel?: Prisma.StringFieldUpdateOperationsInput | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sources?: Prisma.SourceUncheckedUpdateManyWithoutWorkspaceNestedInput
@@ -701,6 +734,7 @@ export type WorkspaceCreateWithoutArtifactsInput = {
   description?: string | null
   icon?: string | null
   defaultModel?: string
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutWorkspacesInput
@@ -715,6 +749,7 @@ export type WorkspaceUncheckedCreateWithoutArtifactsInput = {
   description?: string | null
   icon?: string | null
   defaultModel?: string
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sources?: Prisma.SourceUncheckedCreateNestedManyWithoutWorkspaceInput
@@ -743,6 +778,7 @@ export type WorkspaceUpdateWithoutArtifactsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   defaultModel?: Prisma.StringFieldUpdateOperationsInput | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutWorkspacesNestedInput
@@ -757,6 +793,7 @@ export type WorkspaceUncheckedUpdateWithoutArtifactsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   defaultModel?: Prisma.StringFieldUpdateOperationsInput | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sources?: Prisma.SourceUncheckedUpdateManyWithoutWorkspaceNestedInput
@@ -769,6 +806,7 @@ export type WorkspaceCreateManyUserInput = {
   description?: string | null
   icon?: string | null
   defaultModel?: string
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -779,6 +817,7 @@ export type WorkspaceUpdateWithoutUserInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   defaultModel?: Prisma.StringFieldUpdateOperationsInput | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sources?: Prisma.SourceUpdateManyWithoutWorkspaceNestedInput
@@ -792,6 +831,7 @@ export type WorkspaceUncheckedUpdateWithoutUserInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   defaultModel?: Prisma.StringFieldUpdateOperationsInput | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sources?: Prisma.SourceUncheckedUpdateManyWithoutWorkspaceNestedInput
@@ -805,6 +845,7 @@ export type WorkspaceUncheckedUpdateManyWithoutUserInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   defaultModel?: Prisma.StringFieldUpdateOperationsInput | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -865,6 +906,7 @@ export type WorkspaceSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   description?: boolean
   icon?: boolean
   defaultModel?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -881,6 +923,7 @@ export type WorkspaceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   description?: boolean
   icon?: boolean
   defaultModel?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -893,6 +936,7 @@ export type WorkspaceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   description?: boolean
   icon?: boolean
   defaultModel?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -905,11 +949,12 @@ export type WorkspaceSelectScalar = {
   description?: boolean
   icon?: boolean
   defaultModel?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type WorkspaceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "title" | "description" | "icon" | "defaultModel" | "createdAt" | "updatedAt", ExtArgs["result"]["workspace"]>
+export type WorkspaceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "title" | "description" | "icon" | "defaultModel" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["workspace"]>
 export type WorkspaceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   sources?: boolean | Prisma.Workspace$sourcesArgs<ExtArgs>
@@ -939,6 +984,7 @@ export type $WorkspacePayload<ExtArgs extends runtime.Types.Extensions.InternalA
     description: string | null
     icon: string | null
     defaultModel: string
+    deletedAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["workspace"]>
@@ -1374,6 +1420,7 @@ export interface WorkspaceFieldRefs {
   readonly description: Prisma.FieldRef<"Workspace", 'String'>
   readonly icon: Prisma.FieldRef<"Workspace", 'String'>
   readonly defaultModel: Prisma.FieldRef<"Workspace", 'String'>
+  readonly deletedAt: Prisma.FieldRef<"Workspace", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Workspace", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Workspace", 'DateTime'>
 }

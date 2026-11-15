@@ -58,3 +58,27 @@ export const ArtifactStatus = {
 } as const
 
 export type ArtifactStatus = (typeof ArtifactStatus)[keyof typeof ArtifactStatus]
+
+
+export const JobStatus = {
+  PENDING: 'PENDING',
+  DISPATCHED: 'DISPATCHED',
+  RUNNING: 'RUNNING',
+  SUCCEEDED: 'SUCCEEDED',
+  FAILED: 'FAILED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type JobStatus = (typeof JobStatus)[keyof typeof JobStatus]
+
+
+export const JobType = {
+  SOURCE: 'SOURCE',
+  ARTIFACT: 'ARTIFACT',
+  SUMMARY: 'SUMMARY',
+  MEMORY: 'MEMORY',
+  SOURCE_CLEANUP: 'SOURCE_CLEANUP',
+  WORKSPACE_CLEANUP: 'WORKSPACE_CLEANUP'
+} as const
+
+export type JobType = (typeof JobType)[keyof typeof JobType]

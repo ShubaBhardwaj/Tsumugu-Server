@@ -10,6 +10,7 @@ export const artifactSelect = {
   sourceIds: true,
   status: true,
   metadata: true,
+  jobId: true,
   createdAt: true,
   updatedAt: true,
 } as const;
@@ -29,7 +30,7 @@ export type CreateArtifactData = {
 
 export function findArtifactsByWorkspaceId(workspaceId: string) {
   return prisma.learningArtifact.findMany({
-    where: { workspaceId },
+    where: { workspaceId, workspace: { deletedAt: null } },
     select: artifactSelect,
     orderBy: { createdAt: "desc" },
   });
@@ -40,7 +41,7 @@ export function findArtifactByIdAndWorkspaceId(
   workspaceId: string,
 ) {
   return prisma.learningArtifact.findFirst({
-    where: { id: artifactId, workspaceId },
+    where: { id: artifactId, workspaceId, workspace: { deletedAt: null } },
     select: artifactSelect,
   });
 }

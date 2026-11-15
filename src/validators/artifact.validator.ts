@@ -17,7 +17,7 @@ export const artifactIdParamSchema = workspaceIdParamSchema.extend({
 export const createArtifactSchema = z.object({
   type: z.enum(artifactTypes),
   title: z.string().trim().min(1).max(120).optional(),
-  sourceIds: z.array(z.string().trim().min(1)).optional(),
+  sourceIds: z.array(z.string().trim().min(1)).min(1).max(100).optional(),
 });
 
 export type CreateArtifactInput = z.infer<typeof createArtifactSchema>;

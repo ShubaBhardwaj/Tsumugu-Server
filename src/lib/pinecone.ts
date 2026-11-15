@@ -21,7 +21,17 @@ function getPineconeClient() {
   }
 
   if (!pineconeClient) {
-    pineconeClient = new Pinecone({ apiKey: process.env.PINECONE_API_KEY });
+    pineconeClient = new Pinecone({
+      apiKey: process.env.PINECONE_API_KEY,
+      maxRetries: 0,
+      fetchApi: (input, init) =>
+        fetch(input, {
+          ...init,
+          signal: init?.signal
+            ? AbortSignal.any([init.signal, AbortSignal.timeout(30000)])
+            : AbortSignal.timeout(30000),
+        }),
+    });
   }
 
   return pineconeClient;
@@ -91,6 +101,25 @@ export async function getPineconeIndex(): Promise<Index> {
   return getPineconeClient().index({ name: indexName });
 }
 
+async function existingPineconeIndex(): Promise<Index | null> {
+  const client = getPineconeClient();
+  const indexes = await client.listIndexes();
+  return indexes.indexes?.some((index) => index.name === indexName)
+    ? client.index({ name: indexName })
+    : null;
+}
+async function ignoreMissing(work: () => Promise<unknown>) {
+  try {
+    await work();
+  } catch (error) {
+    if (
+      (error as { name?: string })?.name !== "PineconeNotFoundError" &&
+      (error as { status?: number })?.status !== 404
+    )
+      throw error;
+  }
+}
+
 /** Metadata stored on each Pinecone vector for RAG retrieval and citations. */
 export type VectorMetadata = {
   workspaceId: string;
@@ -101,6 +130,8 @@ export type VectorMetadata = {
   sourceType: string;
   text: string;
   page?: number;
+  jobId?: string;
+  runId?: string;
 };
 
 /**
@@ -140,10 +171,13 @@ export async function deleteSourceVectors(
   workspaceId: string,
   sourceId: string,
 ) {
-  const index = await getPineconeIndex();
-  await index.namespace(workspaceId).deleteMany({
-    filter: { sourceId: { $eq: sourceId } },
-  });
+  const index = await existingPineconeIndex();
+  if (!index) return;
+  await ignoreMissing(() =>
+    index.namespace(workspaceId).deleteMany({
+      filter: { sourceId: { $eq: sourceId } },
+    }),
+  );
 }
 
 /**
@@ -156,8 +190,9 @@ export async function deleteSourceVectors(
  *
  */
 export async function deleteWorkspaceVectors(workspaceId: string) {
-  const index = await getPineconeIndex();
-  await index.namespace(workspaceId).deleteAll();
+  const index = await existingPineconeIndex();
+  if (!index) return;
+  await ignoreMissing(() => index.namespace(workspaceId).deleteAll());
 }
 
 /**
@@ -185,3 +220,34 @@ export async function queryWorkspaceVectors(
 }
 
 export { indexName as PINECONE_INDEX_NAME };
+
+export async function deleteJobVectors(
+  workspaceId: string,
+  sourceId: string,
+  jobId: string,
+  runId?: string,
+) {
+  const index = await existingPineconeIndex();
+  if (!index) return;
+  await ignoreMissing(() =>
+    index
+      .namespace(workspaceId)
+      .deleteMany({
+        filter: {
+          sourceId: { $eq: sourceId },
+          jobId: { $eq: jobId },
+          ...(runId ? { runId: { $eq: runId } } : {}),
+        },
+      }),
+  );
+}
+
+export async function deleteVectorIds(workspaceId: string, ids: string[]) {
+  if (!ids.length) return;
+  const index = await existingPineconeIndex();
+  if (!index) return;
+  for (let i = 0; i < ids.length; i += 100)
+    await ignoreMissing(() =>
+      index.namespace(workspaceId).deleteMany({ ids: ids.slice(i, i + 100) }),
+    );
+}

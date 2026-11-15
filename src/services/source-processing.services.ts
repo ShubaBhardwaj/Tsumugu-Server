@@ -1,250 +1,136 @@
-import type { PineconeRecord } from "@pinecone-database/pinecone";
-import type { Prisma } from "../generated/prisma/client.js";
+import prisma from "../lib/db.js";
 import { chunkPages, chunkText } from "../lib/chunking.js";
-import { embedTexts } from "../lib/openai.js";
-import { extractPdfFromCloudinary } from "../lib/pdf.js";
-import {
-  deleteSourceVectors,
-  type VectorMetadata,
-  upsertSourceVectors,
-} from "../lib/pinecone.js";
-import {
-  createSourceChunks,
-  deleteChunksBySourceId,
-  findChunksBySourceId,
-  type SourceChunkRecord,
-} from "../repository/source-chunk.repository.js";
-import {
-  findSourceById,
-  updateSourceRecord,
-  type SourceRecord,
-} from "../repository/source.repository.js";
+import { sourceProviders } from "../lib/source-providers.js";
+import { ValidationError } from "../types/app-error.js";
+import type { JobContext } from "./job.services.js";
 
-type SourceMetadata = {
-  fileUrl?: string;
-  fileName?: string;
-  fileSize?: number;
-  publicId?: string;
-  resourceType?: "raw" | "image";
-  importedFrom?: string;
-  videoId?: string;
-  processingError?: string;
-  chunkCount?: number;
-  pageCount?: number;
-  indexedAt?: string;
-};
-
-async function extractSourceText(source: SourceRecord) {
-  const text = source.content?.trim();
-  if (text) {
-    return {
-      text,
-      pageCount: undefined,
-      pages: undefined,
-    };
-  }
-
-  if (source.type === "PDF") {
-    const metadata =
-      source.metadata &&
-      typeof source.metadata === "object" &&
-      !Array.isArray(source.metadata)
-        ? (source.metadata as SourceMetadata)
-        : {};
-    if (!metadata.fileUrl) {
-      throw new Error("PDF source is missing fileUrl metadata");
-    }
-
-    const extracted = await extractPdfFromCloudinary({
-      fileUrl: metadata.fileUrl,
-      publicId: metadata.publicId,
-      resourceType: metadata.resourceType ?? "image",
+export async function processSourceJob(ctx: JobContext) {
+  const runId = `${ctx.job.id}:${ctx.job.deliveryGeneration}`;
+  const source = await ctx.commit(async (tx) => {
+    return tx.source.update({
+      where: { id: ctx.job.resourceId },
+      data: { status: "PROCESSING" },
     });
-    return {
-      text: extracted.text,
-      pageCount: extracted.pageCount,
-      pages: extracted.pages,
-    };
-  }
-
-  throw new Error(`Source ${source.id} has no extractable content`);
-}
-
-export function markSourceProcessing(sourceId: string) {
-  return updateSourceRecord(sourceId, { status: "PROCESSING" });
-}
-
-export async function markSourceFailed(
-  sourceId: string,
-  error: unknown,
-  existingMetadata: SourceRecord["metadata"],
-) {
-  const message =
-    error instanceof Error ? error.message : "Source processing failed";
-
-  const metadata =
-    existingMetadata &&
-    typeof existingMetadata === "object" &&
-    !Array.isArray(existingMetadata)
-      ? (existingMetadata as SourceMetadata)
-      : {};
-
-  return updateSourceRecord(sourceId, {
-    status: "FAILED",
-    metadata: {
-      ...metadata,
-      processingError: message,
-    },
   });
-}
-
-export async function extractSourceContent(sourceId: string) {
-  const source = await findSourceById(sourceId);
-  if (!source) {
-    throw new Error("Source not found");
-  }
-
-  const extracted = await extractSourceText(source);
   const metadata =
-    source.metadata &&
-    typeof source.metadata === "object" &&
-    !Array.isArray(source.metadata)
-      ? (source.metadata as SourceMetadata)
+    source.metadata && typeof source.metadata === "object"
+      ? (source.metadata as Record<string, any>)
       : {};
-
-  await updateSourceRecord(sourceId, {
-    content: extracted.text,
-    metadata: {
-      ...metadata,
-      pageCount: extracted.pageCount ?? metadata.pageCount,
-    },
-  });
-
-  return {
-    sourceId,
-    workspaceId: source.workspaceId,
-    text: extracted.text,
-    pages: extracted.pages,
-    source,
-  };
-}
-
-export async function chunkSourceContent(
-  sourceId: string,
-  text: string,
-  pages?: string[],
-) {
-  await deleteChunksBySourceId(sourceId);
-
-  const chunks = pages?.length ? chunkPages(pages) : chunkText(text);
-
-  if (chunks.length === 0) {
-    throw new Error("No chunks were generated from source content");
-  }
-
-  return createSourceChunks(
-    chunks.map((chunk) => ({
-      sourceId,
-      index: chunk.index,
-      content: chunk.content,
-      tokenCount: Math.ceil(chunk.content.length / 4),
-      metadata: chunk.metadata as Prisma.InputJsonValue | undefined,
-    })),
-  );
-}
-
-export async function removeSourceFromIndex(
-  workspaceId: string,
-  sourceId: string,
-) {
-  await deleteSourceVectors(workspaceId, sourceId);
-  await deleteChunksBySourceId(sourceId);
-}
-
-/**
- * Returns all chunks for a source plus the total count.
- * Useful for debugging, admin UI, or verifying processing completed.
- *
- */
-export async function listChunksForSource(sourceId: string) {
-  const chunks = await findChunksBySourceId(sourceId);
-  return { chunks, count: chunks.length };
-}
-
-/**
- * Step 3 of the pipeline: embed chunks and store vectors in Pinecone.
- *
- * - Sends chunk text to OpenAI in batches of 50
- * - Builds Pinecone records with embedding + searchable metadata
- * - Upserts vectors into the workspace namespace
- * - Marks source as `READY` with `chunkCount` and `indexedAt`
- *
- * Pinecone metadata includes enough context for retrieval without re-querying Postgres:
- * `sourceTitle`, `sourceType`, chunk `text` (truncated to 35k chars), and optional `page`.
- *
- * @param source - The parent source record
- * @param chunks - Chunk rows already saved in Postgres (must have `id`)
- * @returns Updated source record with status `READY`
- *
- *
- */
-
-export async function embedAndIndexSource(
-  source: SourceRecord,
-  chunks: SourceChunkRecord[],
-) {
-  const batchSize = 50;
-  const records: PineconeRecord<VectorMetadata>[] = [];
-
-  for (let i = 0; i < chunks.length; i += batchSize) {
-    const batch = chunks.slice(i, i + batchSize);
-    const embeddings = await embedTexts(batch.map((chunk) => chunk.content));
-
-    for (let j = 0; j < batch.length; j += 1) {
-      const chunk = batch[j]!;
-      const embedding = embeddings[j]!;
-      const chunkMetadata =
-        chunk.metadata &&
-        typeof chunk.metadata === "object" &&
-        !Array.isArray(chunk.metadata)
-          ? (chunk.metadata as Record<string, unknown>)
-          : {};
-
-      records.push({
-        id: chunk.id,
-        values: embedding,
-        metadata: {
-          workspaceId: source.workspaceId,
-          sourceId: source.id,
-          chunkId: chunk.id,
-          chunkIndex: chunk.index,
-          sourceTitle: source.title,
-          sourceType: source.type,
-          text: chunk.content.slice(0, 35000),
-          ...(typeof chunkMetadata.page === "number"
-            ? { page: chunkMetadata.page }
-            : {}),
-        },
+  let text = source.content?.trim() ?? "";
+  let pages: string[] | undefined;
+  if (source.type === "PDF") {
+    if (!metadata.fileUrl)
+      throw new ValidationError(
+        "Original PDF is unavailable. Re-upload the PDF.",
+      );
+    try {
+      const result = await sourceProviders.extractPdfFromCloudinary({
+        fileUrl: metadata.fileUrl,
+        publicId: metadata.publicId,
+        resourceType: metadata.resourceType ?? "raw",
       });
+      text = result.text;
+      pages = result.pages;
+    } catch {
+      throw new ValidationError(
+        "Original PDF could not be read. Re-upload or retry the PDF.",
+      );
     }
   }
-
-  await upsertSourceVectors(source.workspaceId, records);
-
-  const metadata =
-    source.metadata &&
-    typeof source.metadata === "object" &&
-    !Array.isArray(source.metadata)
-      ? (source.metadata as SourceMetadata)
-      : {};
-
-  return updateSourceRecord(source.id, {
-    status: "READY",
-    metadata: {
-      ...metadata,
-      chunkCount: chunks.length,
-      indexedAt: new Date().toISOString(),
-      processingError: undefined,
-    },
+  if (!text) throw new ValidationError("Source has no usable text");
+  const parts = pages ? chunkPages(pages) : chunkText(text);
+  if (!parts.length) throw new ValidationError("No chunks were generated");
+  const oldChunks = await prisma.sourceChunk.findMany({
+    where: { sourceId: source.id },
+    select: { id: true },
   });
+  await ctx.check();
+  await sourceProviders.deleteVectorIds(
+    source.workspaceId,
+    oldChunks.map((c) => c.id),
+  );
+  await ctx.check();
+  const chunks = await ctx.commit(async (tx) => {
+    await tx.sourceChunk.deleteMany({ where: { sourceId: source.id } });
+    await tx.sourceChunk.createMany({
+      data: parts.map((part) => ({
+        id: `${runId}:${part.index}`,
+        sourceId: source.id,
+        index: part.index,
+        content: part.content,
+        tokenCount: Math.ceil(part.content.length / 4),
+        metadata: part.metadata as any,
+      })),
+    });
+    const rows = await tx.sourceChunk.findMany({
+      where: { sourceId: source.id },
+      orderBy: { index: "asc" },
+    });
+    await tx.source.update({
+      where: { id: source.id },
+      data: { content: text },
+    });
+    return rows;
+  });
+  try {
+    for (let i = 0; i < chunks.length; i += 50) {
+      await ctx.check();
+      const batch = chunks.slice(i, i + 50);
+      const embeddings = await sourceProviders.embedTexts(
+        batch.map((c) => c.content),
+      );
+      await ctx.check();
+      await sourceProviders.upsertSourceVectors(
+        source.workspaceId,
+        batch.map((chunk, n) => ({
+          id: chunk.id,
+          values: embeddings[n]!,
+          metadata: {
+            workspaceId: source.workspaceId,
+            sourceId: source.id,
+            chunkId: chunk.id,
+            chunkIndex: chunk.index,
+            sourceTitle: source.title,
+            sourceType: source.type,
+            text: chunk.content,
+            jobId: ctx.job.id,
+            runId,
+            ...((chunk.metadata as any)?.page
+              ? { page: (chunk.metadata as any).page }
+              : {}),
+          },
+        })),
+      );
+      await ctx.check();
+    }
+    await ctx.commit((tx) =>
+      tx.source.update({
+        where: { id: source.id },
+        data: {
+          status: "READY",
+          metadata: {
+            ...metadata,
+            pageCount: pages?.length ?? metadata.pageCount ?? null,
+            chunkCount: chunks.length,
+            indexedAt: new Date().toISOString(),
+            indexRun: runId,
+            processingError: null,
+          },
+        },
+      }),
+    );
+  } catch (error) {
+    // Delete only this run, never a newer generation's vectors.
+    await sourceProviders
+      .deleteJobVectors(source.workspaceId, source.id, ctx.job.id, runId)
+      .catch(() => {});
+    throw error;
+  }
+}
+export async function listChunksForSource(sourceId: string) {
+  const chunks = await prisma.sourceChunk.findMany({
+    where: { sourceId },
+    orderBy: { index: "asc" },
+  });
+  return { chunks, count: chunks.length };
 }

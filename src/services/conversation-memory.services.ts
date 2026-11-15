@@ -1,81 +1,125 @@
-import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
+import prisma from "../lib/db.js";
+import { aiProvider } from "../lib/ai-provider.js";
 import { CHAT_MODEL } from "../lib/ai-config.js";
 import { addMemoriesFromMessages } from "../lib/mem0.js";
-import {
-  findConversationById,
-  updateConversationSummary,
-} from "../repository/conversation.repository.js";
-import { findMessagesByConversationId } from "../repository/message.repository.js";
-import { NotFoundError } from "../types/app-error.js";
-
-/**
- * Generates a rolling conversation summary and syncs recent learnings to Mem0.
- *
- * Called asynchronously (via Inngest) every N messages. The summary replaces
- * older history in chat context; Mem0 receives the last 16 messages for extraction.
- *
- * @param conversationId - Conversation to summarize
- * @param userId - Owner of the conversation (used for Mem0)
- * @returns Updated conversation with `summary` and `summaryMessageCount`
- * @throws {NotFoundError} When the conversation does not exist
- *
- *
- */
-export async function summarizeConversationById(
-  conversationId: string,
-  userId: string,
-) {
-  const conversation = await findConversationById(conversationId);
-
-  if (!conversation) {
-    throw new NotFoundError("Conversation not found");
+import { ValidationError } from "../types/app-error.js";
+import { CancelledJob, type JobContext } from "./job.services.js";
+export const memoryLearning = { add: addMemoriesFromMessages };
+export const SUMMARY_INPUT_LIMIT = 24_000;
+export function summaryBatch<
+  T extends { content: string; role: string; position: number },
+>(messages: T[], previous: string) {
+  const batch: T[] = [];
+  let size = previous.length + 256;
+  for (const message of messages) {
+    const length = message.content.length + message.role.length + 4;
+    if (size + length > SUMMARY_INPUT_LIMIT) break;
+    batch.push(message);
+    size += length;
   }
-
-  const messages = await findMessagesByConversationId(conversationId);
-
-  if (messages.length === 0) {
-    return conversation;
-  }
-
-  const transcript = messages
-    .map((message) => `${message.role}: ${message.content}`)
-    .join("\n\n");
-  const previousSummary = conversation.summary?.trim();
-
-  const { text: summary } = await generateText({
+  if (!batch.length && messages.length)
+    throw new ValidationError(
+      "A saved message exceeds the summary input limit",
+    );
+  return batch;
+}
+async function generateSummary(previous: string, transcript: string) {
+  const result = await aiProvider.generateText({
     model: openai(CHAT_MODEL),
-    system: [
-      "You summarize chat conversations for a learning assistant.",
-      "Produce a concise rolling summary covering topics discussed, questions asked,",
-      "key insights, and unresolved threads.",
-      "Write in third person about the user. Keep it under 250 words.",
-    ].join("\n"),
-    prompt: [
-      previousSummary ? `Previous summary:\n${previousSummary}\n` : null,
-      "Full conversation transcript:",
-      transcript,
-      "",
-      "Write an updated summary that incorporates new messages.",
-    ]
-      .filter(Boolean)
-      .join("\n"),
+    abortSignal: AbortSignal.timeout(30000),
+    maxRetries: 0,
+    system:
+      "Summarize new messages into the previous summary. Keep under 250 words and 2000 characters. Preserve questions, preferences, facts, and unresolved topics.",
+    prompt: `Previous summary:\n${previous}\nNew messages:\n${transcript}`,
   });
-
-  const updated = await updateConversationSummary(conversationId, {
-    summary: summary.trim(),
-    summaryMessageCount: messages.length,
+  const summary = result.text.trim();
+  if (!summary || summary.length > 2000 || summary.split(/\s+/).length > 250)
+    throw new ValidationError("Generated summary exceeded its output limit");
+  return summary;
+}
+export async function summarizeConversationJob(ctx: JobContext) {
+  while (true) {
+    await ctx.check();
+    const conversation = await prisma.conversation.findUnique({
+      where: { id: ctx.job.resourceId },
+    });
+    if (!conversation) throw new CancelledJob();
+    const messages = await prisma.message.findMany({
+      where: {
+        conversationId: conversation.id,
+        position: { gt: conversation.summaryMessageCount },
+      },
+      orderBy: { position: "asc" },
+      take: 100,
+    });
+    if (!messages.length) return;
+    let summary = conversation.summary ?? "";
+    let covered: number;
+    if (
+      messages[0]!.content.length + summary.length + 300 >
+      SUMMARY_INPUT_LIMIT
+    ) {
+      // Old stored messages may predate today's request limits. Cover all fragments before advancing.
+      const message = messages[0]!;
+      let offset = 0;
+      while (offset < message.content.length) {
+        await ctx.check();
+        const part = message.content.slice(
+          offset,
+          offset + SUMMARY_INPUT_LIMIT - summary.length - 300,
+        );
+        summary = await generateSummary(summary, `${message.role}: ${part}`);
+        offset += part.length;
+      }
+      covered = message.position;
+    } else {
+      const batch = summaryBatch(messages, summary);
+      summary = await generateSummary(
+        summary,
+        batch.map((m) => `${m.role}: ${m.content}`).join("\n\n"),
+      );
+      covered = batch.at(-1)!.position;
+    }
+    await ctx.commit((tx) =>
+      tx.conversation.updateMany({
+        where: {
+          id: conversation.id,
+          summaryMessageCount: conversation.summaryMessageCount,
+        },
+        data: {
+          summary,
+          summaryMessageCount: covered,
+          summarizedAt: new Date(),
+        },
+      }),
+    );
+  }
+}
+export async function learnConversationJob(ctx: JobContext) {
+  if (!process.env.MEM0_API_KEY?.trim()) return;
+  const payload = ctx.job.payload as { messageIds?: string[] };
+  const conversation = await prisma.conversation.findFirst({
+    where: {
+      id: ctx.job.resourceId,
+      workspace: { deletedAt: null, userId: ctx.job.ownerId },
+    },
   });
-
-  const recentMessages = messages.slice(-16).map((message) => ({
-    role: message.role.toLowerCase() as "user" | "assistant",
-    content: message.content,
-  }));
-
-  await addMemoriesFromMessages(userId, recentMessages, {
-    source: "learned",
-    conversationId,
+  if (!conversation) throw new CancelledJob();
+  const messages = await prisma.message.findMany({
+    where: {
+      conversationId: conversation.id,
+      id: { in: payload.messageIds ?? [] },
+    },
+    orderBy: { position: "asc" },
   });
-
-  return updated;
+  await ctx.check();
+  await memoryLearning.add(
+    ctx.job.ownerId,
+    messages.map((m) => ({
+      role: m.role === "USER" ? "user" : "assistant",
+      content: m.content,
+    })),
+    { source: "learned", conversationId: conversation.id },
+  );
 }

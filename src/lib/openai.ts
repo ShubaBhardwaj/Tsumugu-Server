@@ -17,7 +17,11 @@ export async function embedTexts(texts: string[]): Promise<number[][]> {
   }
 
   if (!client) {
-    client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    client = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+      timeout: 30000,
+      maxRetries: 0,
+    });
   }
 
   const response = await client.embeddings.create({

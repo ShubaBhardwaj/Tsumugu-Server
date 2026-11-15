@@ -1,22 +1,13 @@
-/**
- * Inngest event helpers for background artifact generation.
- */
-
-import { inngest } from "../inngest/client.js";
-
-/**
- * Enqueues an artifact generation job to run asynchronously via Inngest.
- *
- * @param input - Artifact and workspace ids for the worker
- * @returns Resolves when the event is accepted by Inngest
- *
- */
+import prisma from "./db.js";
+import { kickJob } from "../services/job.services.js";
 export async function enqueueArtifactGeneration(input: {
   artifactId: string;
   workspaceId: string;
 }) {
-  await inngest.send({
-    name: "artifact/generate",
-    data: input,
+  const artifact = await prisma.learningArtifact.findFirstOrThrow({
+    where: { id: input.artifactId, workspaceId: input.workspaceId },
   });
+  if (!artifact.jobId)
+    throw new Error("Artifact must be created with a durable generation job");
+  kickJob(artifact.jobId);
 }
