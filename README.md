@@ -46,6 +46,8 @@
 
 Production uses `bun run build` and `bun run start`. Set `NODE_ENV=production`, explicit `CLIENT_URL`, Inngest event/signing keys, and all enabled core provider settings. Production rejects `INNGEST_DEV=true`. Register `/api/inngest` with the production Inngest environment. The two registered functions execute jobs and recover pending work once a minute. Do not deploy the old server over the new schema's marked-deleted records; see the change design's migration/rollback instructions.
 
+The Inngest app ID is `Tsumugu`. It registers `background-job` for `background/run` events and `recover-background-jobs` for the one-minute recovery schedule. Source processing, artifact generation, and conversation summarization still run as `SOURCE`, `ARTIFACT`, and `SUMMARY` database jobs inside `background-job`; they are no longer separate Inngest functions. Changing the app ID creates a new Inngest app, so sync `Tsumugu` after deployment and retire the old app only after checking for active runs.
+
 ## Deploy on a VPS
 
 The included [Dockerfile](Dockerfile) builds the API and generates the Prisma client. [Docker Compose](docker-compose.yml) loads production settings from the VPS `.env`, attaches the container to the external `proxy-network`, and checks the `/` health endpoint. At startup, the container applies pending Prisma migrations before starting Node.js. The hosted PostgreSQL URL comes from the **VPS `.env` at runtime**; the build-time URL in the Dockerfile is only a placeholder for client generation.
