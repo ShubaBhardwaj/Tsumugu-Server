@@ -195,21 +195,26 @@ test("AI provider configuration requires only the selected key", () => {
   expect(() => readServerConfig({ ...base, OPENAI_API_KEY: "openai-test" })).not.toThrow();
   expect(() => readServerConfig({ ...base, AI_PROVIDER: "gemini", GEMINI_API_KEY: "gemini-test" })).not.toThrow();
   expect(() => readServerConfig({ ...base, AI_PROVIDER: "gemini" })).toThrow("GEMINI_API_KEY");
+  expect(() => readServerConfig({ ...base, AI_PROVIDER: "gemini", GEMINI_API_KEY: "gemini-test", GEMINI_CHAT_MODEL: "gpt-4o-mini" })).toThrow("GEMINI_CHAT_MODEL");
   expect(() => readServerConfig({ ...base, AI_PROVIDER: "openai" })).toThrow("OPENAI_API_KEY");
   expect(() => readServerConfig({ ...base, AI_PROVIDER: "other" })).toThrow("AI_PROVIDER");
 });
 
 test("Gemini validates explicit models and maps old workspace preferences", async () => {
   const previous = process.env.AI_PROVIDER;
+  const previousModel = process.env.GEMINI_CHAT_MODEL;
   try {
     process.env.AI_PROVIDER = "gemini";
-    expect(resolveChatModel("gpt-4o-mini")).toBe("gemini-2.5-flash-lite");
+    delete process.env.GEMINI_CHAT_MODEL;
+    expect(resolveChatModel("gpt-4o-mini")).toBe("gemini-3.1-flash-lite");
     expect(() => resolveChatModel("gpt-4o", true)).toThrow();
     expect(createWorkspaceSchema.safeParse({ title: "Test", defaultModel: "gpt-4o" }).success).toBe(false);
     await expect(parseChatBody({ messages: [message], model: "gpt-4o" })).rejects.toThrow();
-    expect(createWorkspaceSchema.safeParse({ title: "Test", defaultModel: "gemini-2.5-flash-lite" }).success).toBe(true);
+    expect(createWorkspaceSchema.safeParse({ title: "Test", defaultModel: "gemini-3.1-flash-lite" }).success).toBe(true);
   } finally {
     if (previous === undefined) delete process.env.AI_PROVIDER;
     else process.env.AI_PROVIDER = previous;
+    if (previousModel === undefined) delete process.env.GEMINI_CHAT_MODEL;
+    else process.env.GEMINI_CHAT_MODEL = previousModel;
   }
 });

@@ -27,7 +27,7 @@ This is a server setting rather than a workspace setting because source indexes 
 
 ### Use a 1,536-dimensional Gemini embedding profile
 
-Use `gemini-2.5-flash-lite` as the initial Gemini text default and `gemini-embedding-001` for embeddings, requesting `outputDimensionality: 1536`. Use retrieval-document task type when indexing chunks and retrieval-query task type for questions, and keep the same choice for every call within each path. The OpenAI defaults remain `gpt-4o-mini` and `text-embedding-3-small` at 1,536 dimensions. A provider profile identifier includes provider, model, and dimension; any future model or dimension change creates a new profile.
+Use `gemini-3.1-flash-lite` as the Gemini text default, with an optional server-side `GEMINI_CHAT_MODEL` override because available generation models vary by API key. The initial `gemini-2.5-flash-lite` choice returned 404 for the test key while embedding calls succeeded. Use `gemini-embedding-001` for embeddings, requesting `outputDimensionality: 1536`. Use retrieval-document task type when indexing chunks and retrieval-query task type for questions, and keep the same choice for every call within each path. The OpenAI defaults remain `gpt-4o-mini` and `text-embedding-3-small` at 1,536 dimensions. An embedding profile identifier includes provider, embedding model, and dimension; a future embedding model or dimension change creates a new profile.
 
 Matching Pinecone dimensions allow the existing index to be reused, but equal length does not make the vector spaces compatible. A second index would consume an extra index allowance and is unnecessary for isolation.
 

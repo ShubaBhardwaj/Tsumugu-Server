@@ -39,6 +39,10 @@ The server SHALL accept only models supported by its selected provider for expli
 - **WHEN** Gemini is selected and a workspace still stores `gpt-4o-mini`
 - **THEN** chat uses the configured Gemini default without rewriting saved conversations
 
+#### Scenario: Gemini text model changes
+- **WHEN** the server configures a different Gemini text model and a workspace stores the previous Gemini model
+- **THEN** implicit chat, summaries, and study generation use the configured model while an explicit request for the previous model is rejected
+
 #### Scenario: Wrong-provider request
 - **WHEN** Gemini is selected and a client explicitly requests `gpt-4o`
 - **THEN** the request is rejected with a validation error before a model call

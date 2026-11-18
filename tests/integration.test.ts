@@ -868,7 +868,7 @@ suite("isolated PostgreSQL and HTTP flows", () => {
       expect((await retrieveWorkspaceContext(ws, "cells")).length).toBeGreaterThan(0);
       expect(sourceProviders.deleteSourceVectorsInOtherProfiles).toHaveBeenCalledWith(ws, row.id);
       const geminiWorkspace = await json(await call("POST", "/api/workspaces", { title: "Gemini study" }));
-      expect(geminiWorkspace.defaultModel).toBe("gemini-2.5-flash-lite");
+      expect(geminiWorkspace.defaultModel).toBe("gemini-3.1-flash-lite");
       process.env.AI_PROVIDER = "openai";
       expect((await json(await call("GET", `/api/workspaces/${ws}/sources/${row.id}`))).needsReindex).toBe(true);
       expect(await retrieveWorkspaceContext(ws, "cells")).toEqual([]);
@@ -1052,7 +1052,7 @@ suite("isolated PostgreSQL and HTTP flows", () => {
       });
       expect(response.status).toBe(200);
       expect(await response.text()).toContain("Answer from the source");
-      expect(chatModelProvider.get).toHaveBeenCalledWith("gemini-2.5-flash-lite");
+      expect(chatModelProvider.get).toHaveBeenCalledWith("gemini-3.1-flash-lite");
       const messages = await prisma.message.findMany({ orderBy: { position: "asc" } });
       expect(messages.map((message) => message.role)).toEqual(["USER", "ASSISTANT"]);
       expect(messages[1]!.citations).toBeTruthy();

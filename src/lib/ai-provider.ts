@@ -5,7 +5,6 @@ import {
   CHAT_MODEL,
   CHAT_MODELS,
   GEMINI_CHAT_MODEL,
-  GEMINI_CHAT_MODELS,
 } from "./ai-config.js";
 import { ValidationError } from "../types/app-error.js";
 import { safeAiError } from "./ai-errors.js";
@@ -28,12 +27,19 @@ export function selectedAiProvider(env: NodeJS.ProcessEnv = process.env): AiProv
   return value;
 }
 
+export function configuredGeminiChatModel(env: NodeJS.ProcessEnv = process.env): string {
+  const model = env.GEMINI_CHAT_MODEL?.trim() || GEMINI_CHAT_MODEL;
+  if (!/^gemini-[a-z0-9][a-z0-9.-]*$/.test(model))
+    throw new Error("Invalid GEMINI_CHAT_MODEL setting: expected a Gemini model ID");
+  return model;
+}
+
 export function defaultChatModel() {
-  return selectedAiProvider() === "gemini" ? GEMINI_CHAT_MODEL : CHAT_MODEL;
+  return selectedAiProvider() === "gemini" ? configuredGeminiChatModel() : CHAT_MODEL;
 }
 
 export function supportedChatModels(): readonly string[] {
-  return selectedAiProvider() === "gemini" ? GEMINI_CHAT_MODELS : CHAT_MODELS;
+  return selectedAiProvider() === "gemini" ? [configuredGeminiChatModel()] : CHAT_MODELS;
 }
 
 export function isSupportedChatModel(model: string): boolean {

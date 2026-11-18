@@ -1,7 +1,8 @@
 import "dotenv/config";
-import { selectedAiProvider } from "./ai-provider.js";
+import { configuredGeminiChatModel, selectedAiProvider } from "./ai-provider.js";
 export function readServerConfig(env: NodeJS.ProcessEnv = process.env) {
   const aiProvider = selectedAiProvider(env);
+  if (aiProvider === "gemini") configuredGeminiChatModel(env);
   const production = env.NODE_ENV === "production";
   const clientUrl =
     env.CLIENT_URL || (production ? "" : "http://localhost:3001");

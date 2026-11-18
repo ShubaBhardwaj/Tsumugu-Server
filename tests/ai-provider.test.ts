@@ -4,7 +4,7 @@ import { EMBEDDING_DIMENSIONS } from "../src/lib/ai-config";
 import { allWorkspaceVectorNamespaces, GEMINI_EMBEDDING_PROFILE, OPENAI_EMBEDDING_PROFILE, sourceIsSearchable, sourceNeedsReindex, workspaceVectorNamespace } from "../src/lib/embedding-profile";
 import { assertIndexDimensions } from "../src/lib/pinecone";
 import { safeAiError } from "../src/lib/ai-errors";
-import { aiProvider } from "../src/lib/ai-provider";
+import { aiProvider, configuredGeminiChatModel, defaultChatModel, resolveChatModel } from "../src/lib/ai-provider";
 import { generateArtifactContent } from "../src/services/artifact-generation.services";
 import { generateSummary } from "../src/services/conversation-memory.services";
 import { chatModelProvider } from "../src/services/chat.services";
@@ -12,6 +12,7 @@ import { chatModelProvider } from "../src/services/chat.services";
 test("Gemini embeddings use separate document and query task types without an OpenAI key", async () => {
   const oldProvider = process.env.AI_PROVIDER;
   const oldGeminiKey = process.env.GEMINI_API_KEY;
+  const oldGeminiModel = process.env.GEMINI_CHAT_MODEL;
   const oldOpenAIKey = process.env.OPENAI_API_KEY;
   const embedding = Array(EMBEDDING_DIMENSIONS).fill(0.01);
   const mocked = spyOn(embeddingRuntime, "embedMany").mockImplementation(
@@ -20,6 +21,7 @@ test("Gemini embeddings use separate document and query task types without an Op
   try {
     process.env.AI_PROVIDER = "gemini";
     process.env.GEMINI_API_KEY = "test-only";
+    delete process.env.GEMINI_CHAT_MODEL;
     delete process.env.OPENAI_API_KEY;
     expect(await embedTexts(["source text"], "document")).toEqual([embedding]);
     expect(await embedTexts(["question"], "query")).toEqual([embedding]);
@@ -38,6 +40,8 @@ test("Gemini embeddings use separate document and query task types without an Op
     else process.env.AI_PROVIDER = oldProvider;
     if (oldGeminiKey === undefined) delete process.env.GEMINI_API_KEY;
     else process.env.GEMINI_API_KEY = oldGeminiKey;
+    if (oldGeminiModel === undefined) delete process.env.GEMINI_CHAT_MODEL;
+    else process.env.GEMINI_CHAT_MODEL = oldGeminiModel;
     if (oldOpenAIKey === undefined) delete process.env.OPENAI_API_KEY;
     else process.env.OPENAI_API_KEY = oldOpenAIKey;
   }
@@ -56,6 +60,28 @@ test("provider namespaces isolate Gemini while preserving legacy OpenAI vectors"
   } finally {
     if (previous === undefined) delete process.env.AI_PROVIDER;
     else process.env.AI_PROVIDER = previous;
+  }
+});
+
+test("Gemini text model can be selected per deployment", () => {
+  const oldProvider = process.env.AI_PROVIDER;
+  const oldModel = process.env.GEMINI_CHAT_MODEL;
+  try {
+    process.env.AI_PROVIDER = "gemini";
+    delete process.env.GEMINI_CHAT_MODEL;
+    expect(defaultChatModel()).toBe("gemini-3.1-flash-lite");
+    process.env.GEMINI_CHAT_MODEL = "gemini-3-flash-preview";
+    expect(configuredGeminiChatModel()).toBe("gemini-3-flash-preview");
+    expect(defaultChatModel()).toBe("gemini-3-flash-preview");
+    expect(resolveChatModel("gemini-3.1-flash-lite")).toBe("gemini-3-flash-preview");
+    expect(() => resolveChatModel("gemini-3.1-flash-lite", true)).toThrow();
+    process.env.GEMINI_CHAT_MODEL = "gpt-4o-mini";
+    expect(() => configuredGeminiChatModel()).toThrow("Invalid GEMINI_CHAT_MODEL");
+  } finally {
+    if (oldProvider === undefined) delete process.env.AI_PROVIDER;
+    else process.env.AI_PROVIDER = oldProvider;
+    if (oldModel === undefined) delete process.env.GEMINI_CHAT_MODEL;
+    else process.env.GEMINI_CHAT_MODEL = oldModel;
   }
 });
 
@@ -98,6 +124,7 @@ test("AI provider errors expose safe categories, not provider response text", ()
 test("Gemini-only generation covers chat model, summaries, evidence, and every study type", async () => {
   const oldProvider = process.env.AI_PROVIDER;
   const oldGeminiKey = process.env.GEMINI_API_KEY;
+  const oldGeminiModel = process.env.GEMINI_CHAT_MODEL;
   const oldOpenAIKey = process.env.OPENAI_API_KEY;
   const outputs: Record<string, unknown> = {
     TAKEAWAYS: { items: ["One", "Two", "Three"] },
@@ -107,7 +134,7 @@ test("Gemini-only generation covers chat model, summaries, evidence, and every s
     REPORT: { markdown: "Report", sections: [{ title: "Section", content: "Text" }] },
   };
   const mocked = spyOn(aiProvider, "generateText").mockImplementation(async (options: any) => {
-    expect(options.model.modelId).toBe("gemini-2.5-flash-lite");
+    expect(options.model.modelId).toBe("gemini-3.1-flash-lite");
     if (options.system?.startsWith("Determine whether")) return { output: { supported: true } } as any;
     if (options.system?.startsWith("Summarize new messages")) return { text: "Short summary" } as any;
     if (options.system?.includes("generating a summary")) return { text: "Study summary" } as any;
@@ -117,8 +144,9 @@ test("Gemini-only generation covers chat model, summaries, evidence, and every s
   try {
     process.env.AI_PROVIDER = "gemini";
     process.env.GEMINI_API_KEY = "test-only";
+    delete process.env.GEMINI_CHAT_MODEL;
     delete process.env.OPENAI_API_KEY;
-    expect(chatModelProvider.get("gemini-2.5-flash-lite").modelId).toBe("gemini-2.5-flash-lite");
+    expect(chatModelProvider.get("gemini-3.1-flash-lite").modelId).toBe("gemini-3.1-flash-lite");
     expect(await generateSummary("", "USER: explain cells")).toBe("Short summary");
     expect(await generateArtifactContent("SUMMARY", "Cells have membranes", { topic: "cells" })).toEqual({ markdown: "Study summary" });
     for (const type of ["TAKEAWAYS", "FLASHCARDS", "QUIZ", "MINDMAP", "REPORT"] as const)
@@ -130,6 +158,8 @@ test("Gemini-only generation covers chat model, summaries, evidence, and every s
     else process.env.AI_PROVIDER = oldProvider;
     if (oldGeminiKey === undefined) delete process.env.GEMINI_API_KEY;
     else process.env.GEMINI_API_KEY = oldGeminiKey;
+    if (oldGeminiModel === undefined) delete process.env.GEMINI_CHAT_MODEL;
+    else process.env.GEMINI_CHAT_MODEL = oldGeminiModel;
     if (oldOpenAIKey === undefined) delete process.env.OPENAI_API_KEY;
     else process.env.OPENAI_API_KEY = oldOpenAIKey;
   }
