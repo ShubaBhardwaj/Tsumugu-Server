@@ -1,6 +1,7 @@
 import { RAG_MIN_SCORE, RAG_TOP_K } from "../ai-config.js";
 import prisma from "../db.js";
 import { sourceProviders } from "../source-providers.js";
+import { activeEmbeddingProfile, OPENAI_EMBEDDING_PROFILE, sourceIsSearchable } from "../embedding-profile.js";
 
 export type RetrievedChunk = {
   sourceId: string;
@@ -17,7 +18,7 @@ export async function retrieveWorkspaceContext(
   workspaceId: string,
   query: string,
 ): Promise<RetrievedChunk[]> {
-  const [embedding] = await sourceProviders.embedTexts([query]);
+  const [embedding] = await sourceProviders.embedTexts([query], "query");
   const matches = await sourceProviders.queryWorkspaceVectors(
     workspaceId,
     embedding,
@@ -56,6 +57,11 @@ export async function retrieveWorkspaceContext(
 
     if (!live.has(metadata.sourceId)) continue;
     const source = live.get(metadata.sourceId)!;
+    if (!sourceIsSearchable({ status: "READY", metadata: source.metadata })) continue;
+    const vectorProfile = typeof metadata.embeddingProfile === "string"
+      ? metadata.embeddingProfile
+      : OPENAI_EMBEDDING_PROFILE;
+    if (vectorProfile !== activeEmbeddingProfile()) continue;
     if (source.jobId && metadata.jobId !== source.jobId) continue;
     const indexRun = (source.metadata as Record<string, unknown> | null)
       ?.indexRun;

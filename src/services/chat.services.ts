@@ -6,7 +6,7 @@ import {
 } from "../repository/job.repository.js";
 import { insertMessage } from "../repository/message.repository.js";
 import { kickJob } from "./job.services.js";
-import { openai } from "@ai-sdk/openai";
+import { languageModel, resolveChatModel } from "../lib/ai-provider.js";
 import type { Response } from "express";
 import { z } from "zod";
 import {
@@ -19,8 +19,6 @@ import {
   type UIMessage,
 } from "ai";
 import {
-  CHAT_MODEL,
-  CHAT_MODELS,
   CONVERSATION_SUMMARY_INTERVAL,
   RECENT_MESSAGE_WINDOW,
 } from "../lib/ai-config.js";
@@ -237,7 +235,7 @@ async function resolveConversation(
  *
  */
 export const webSearchProvider = { search: searchWeb };
-export const chatModelProvider = { get: (model: string) => openai(model) };
+export const chatModelProvider = { get: languageModel };
 
 export async function streamWorkspaceChat(
   res: Response,
@@ -252,8 +250,7 @@ export async function streamWorkspaceChat(
 ) {
   const workspace = await getWorkspaceByIdForUser(workspaceId, userId);
   const requestedModel = input.model ?? workspace.defaultModel;
-  const chatModel =
-    CHAT_MODELS.find((model) => model === requestedModel) ?? CHAT_MODEL;
+  const chatModel = resolveChatModel(requestedModel, input.model !== undefined);
   const webSearchEnabled = input.webSearch === true;
   if (webSearchEnabled && !process.env.TAVILY_API_KEY?.trim())
     throw new AppError(

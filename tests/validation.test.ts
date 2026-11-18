@@ -4,6 +4,8 @@ import { parseChatBody } from "../src/validators/chat.validator";
 import { validateArtifactContent } from "../src/services/artifact-generation.services";
 import { readServerConfig } from "../src/lib/config";
 import { summaryBatch } from "../src/services/conversation-memory.services";
+import { resolveChatModel } from "../src/lib/ai-provider";
+import { createWorkspaceSchema } from "../src/validators/workspace.validator";
 
 for (const text of [
   "A".repeat(1200) + "\n\n" + "B".repeat(1200),
@@ -151,6 +153,7 @@ test("frontend and production configuration are validated without secret values"
     BETTER_AUTH_SECRET: "sensitive",
     GOOGLE_CLIENT_ID: "test",
     GOOGLE_CLIENT_SECRET: "test",
+    OPENAI_API_KEY: "test",
   };
   expect(readServerConfig(base).clientUrl).toBe("http://localhost:3001");
   expect(() => readServerConfig({ ...base, CLIENT_URL: "invalid" })).toThrow(
@@ -175,7 +178,38 @@ test("frontend and production configuration are validated without secret values"
     INNGEST_SIGNING_KEY: "x",
   };
   expect(readServerConfig(production).production).toBe(true);
+  expect(readServerConfig({ ...production, AI_PROVIDER: "gemini", OPENAI_API_KEY: undefined, GEMINI_API_KEY: "x" }).production).toBe(true);
   expect(() =>
     readServerConfig({ ...production, INNGEST_DEV: "true" }),
   ).toThrow("INNGEST_DEV");
+});
+
+test("AI provider configuration requires only the selected key", () => {
+  const base = {
+    DATABASE_URL: "test",
+    BETTER_AUTH_URL: "http://localhost:8080",
+    BETTER_AUTH_SECRET: "sensitive",
+    GOOGLE_CLIENT_ID: "test",
+    GOOGLE_CLIENT_SECRET: "test",
+  };
+  expect(() => readServerConfig({ ...base, OPENAI_API_KEY: "openai-test" })).not.toThrow();
+  expect(() => readServerConfig({ ...base, AI_PROVIDER: "gemini", GEMINI_API_KEY: "gemini-test" })).not.toThrow();
+  expect(() => readServerConfig({ ...base, AI_PROVIDER: "gemini" })).toThrow("GEMINI_API_KEY");
+  expect(() => readServerConfig({ ...base, AI_PROVIDER: "openai" })).toThrow("OPENAI_API_KEY");
+  expect(() => readServerConfig({ ...base, AI_PROVIDER: "other" })).toThrow("AI_PROVIDER");
+});
+
+test("Gemini validates explicit models and maps old workspace preferences", async () => {
+  const previous = process.env.AI_PROVIDER;
+  try {
+    process.env.AI_PROVIDER = "gemini";
+    expect(resolveChatModel("gpt-4o-mini")).toBe("gemini-2.5-flash-lite");
+    expect(() => resolveChatModel("gpt-4o", true)).toThrow();
+    expect(createWorkspaceSchema.safeParse({ title: "Test", defaultModel: "gpt-4o" }).success).toBe(false);
+    await expect(parseChatBody({ messages: [message], model: "gpt-4o" })).rejects.toThrow();
+    expect(createWorkspaceSchema.safeParse({ title: "Test", defaultModel: "gemini-2.5-flash-lite" }).success).toBe(true);
+  } finally {
+    if (previous === undefined) delete process.env.AI_PROVIDER;
+    else process.env.AI_PROVIDER = previous;
+  }
 });

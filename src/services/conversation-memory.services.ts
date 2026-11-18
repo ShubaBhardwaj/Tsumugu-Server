@@ -1,7 +1,6 @@
-import { openai } from "@ai-sdk/openai";
 import prisma from "../lib/db.js";
 import { aiProvider } from "../lib/ai-provider.js";
-import { CHAT_MODEL } from "../lib/ai-config.js";
+import { languageModel } from "../lib/ai-provider.js";
 import { addMemoriesFromMessages } from "../lib/mem0.js";
 import { ValidationError } from "../types/app-error.js";
 import { CancelledJob, type JobContext } from "./job.services.js";
@@ -24,9 +23,9 @@ export function summaryBatch<
     );
   return batch;
 }
-async function generateSummary(previous: string, transcript: string) {
+export async function generateSummary(previous: string, transcript: string) {
   const result = await aiProvider.generateText({
-    model: openai(CHAT_MODEL),
+    model: languageModel(),
     abortSignal: AbortSignal.timeout(30000),
     maxRetries: 0,
     system:

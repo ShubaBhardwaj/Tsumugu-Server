@@ -4,6 +4,7 @@ import {
   type PineconeRecord,
 } from "@pinecone-database/pinecone";
 import { EMBEDDING_DIMENSIONS } from "./ai-config.js";
+import { allWorkspaceVectorNamespaces, workspaceVectorNamespace } from "./embedding-profile.js";
 
 const indexName = process.env.PINECONE_INDEX ?? "chaibook";
 
@@ -87,7 +88,15 @@ export async function ensurePineconeIndex() {
     await waitForIndexReady(indexName);
   }
 
+  const description = await client.describeIndex(indexName);
+  assertIndexDimensions(description.dimension);
+
   indexReady = true;
+}
+
+export function assertIndexDimensions(dimension: number | undefined) {
+  if (dimension !== EMBEDDING_DIMENSIONS)
+    throw new Error(`Pinecone index dimension must be ${EMBEDDING_DIMENSIONS} for the selected embedding profile`);
 }
 
 /**
@@ -132,6 +141,7 @@ export type VectorMetadata = {
   page?: number;
   jobId?: string;
   runId?: string;
+  embeddingProfile?: string;
 };
 
 /**
@@ -151,7 +161,7 @@ export async function upsertSourceVectors(
   }
 
   const index = await getPineconeIndex();
-  const namespace = index.namespace(workspaceId);
+  const namespace = index.namespace(workspaceVectorNamespace(workspaceId));
 
   const batchSize = 100;
   for (let i = 0; i < records.length; i += batchSize) {
@@ -173,11 +183,24 @@ export async function deleteSourceVectors(
 ) {
   const index = await existingPineconeIndex();
   if (!index) return;
-  await ignoreMissing(() =>
-    index.namespace(workspaceId).deleteMany({
+  for (const namespace of allWorkspaceVectorNamespaces(workspaceId))
+    await ignoreMissing(() =>
+      index.namespace(namespace).deleteMany({
+        filter: { sourceId: { $eq: sourceId } },
+      }),
+    );
+}
+
+export async function deleteSourceVectorsInOtherProfiles(workspaceId: string, sourceId: string) {
+  const index = await existingPineconeIndex();
+  if (!index) return;
+  const activeNamespace = workspaceVectorNamespace(workspaceId);
+  for (const namespace of allWorkspaceVectorNamespaces(workspaceId)) {
+    if (namespace === activeNamespace) continue;
+    await ignoreMissing(() => index.namespace(namespace).deleteMany({
       filter: { sourceId: { $eq: sourceId } },
-    }),
-  );
+    }));
+  }
 }
 
 /**
@@ -192,7 +215,8 @@ export async function deleteSourceVectors(
 export async function deleteWorkspaceVectors(workspaceId: string) {
   const index = await existingPineconeIndex();
   if (!index) return;
-  await ignoreMissing(() => index.namespace(workspaceId).deleteAll());
+  for (const namespace of allWorkspaceVectorNamespaces(workspaceId))
+    await ignoreMissing(() => index.namespace(namespace).deleteAll());
 }
 
 /**
@@ -210,7 +234,7 @@ export async function queryWorkspaceVectors(
   topK: number,
 ) {
   const index = await getPineconeIndex();
-  const result = await index.namespace(workspaceId).query({
+  const result = await index.namespace(workspaceVectorNamespace(workspaceId)).query({
     vector,
     topK,
     includeMetadata: true,
@@ -231,7 +255,7 @@ export async function deleteJobVectors(
   if (!index) return;
   await ignoreMissing(() =>
     index
-      .namespace(workspaceId)
+      .namespace(workspaceVectorNamespace(workspaceId))
       .deleteMany({
         filter: {
           sourceId: { $eq: sourceId },
@@ -246,8 +270,9 @@ export async function deleteVectorIds(workspaceId: string, ids: string[]) {
   if (!ids.length) return;
   const index = await existingPineconeIndex();
   if (!index) return;
-  for (let i = 0; i < ids.length; i += 100)
-    await ignoreMissing(() =>
-      index.namespace(workspaceId).deleteMany({ ids: ids.slice(i, i + 100) }),
-    );
+  for (const namespace of allWorkspaceVectorNamespaces(workspaceId))
+    for (let i = 0; i < ids.length; i += 100)
+      await ignoreMissing(() =>
+        index.namespace(namespace).deleteMany({ ids: ids.slice(i, i + 100) }),
+      );
 }

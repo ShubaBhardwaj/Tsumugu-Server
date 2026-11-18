@@ -308,8 +308,9 @@ export async function runJob(id: string, generation: number) {
         return;
       }
       const exhausted =
-        !(error instanceof RetryJob) &&
-        current.processingAttempts >= (job.type === "SOURCE" ? 4 : 3);
+        (error instanceof AppError && error.code === "AI_PROVIDER_AUTH") ||
+        (!(error instanceof RetryJob) &&
+        current.processingAttempts >= (job.type === "SOURCE" ? 4 : 3));
       const message =
         error instanceof AppError
           ? error.message.slice(0, 240)
@@ -321,7 +322,8 @@ export async function runJob(id: string, generation: number) {
           deliveryGeneration: { increment: 1 },
           leaseUntil: null,
           leaseToken: null,
-          nextAttemptAt: new Date(Date.now() + 30_000),
+          nextAttemptAt: new Date(Date.now() +
+            (error instanceof AppError && error.retryAfter ? error.retryAfter * 1000 : 30_000)),
           lastError: message,
         },
       });

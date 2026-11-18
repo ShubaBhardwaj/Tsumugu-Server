@@ -1,5 +1,7 @@
 import "dotenv/config";
+import { selectedAiProvider } from "./ai-provider.js";
 export function readServerConfig(env: NodeJS.ProcessEnv = process.env) {
+  const aiProvider = selectedAiProvider(env);
   const production = env.NODE_ENV === "production";
   const clientUrl =
     env.CLIENT_URL || (production ? "" : "http://localhost:3001");
@@ -9,11 +11,11 @@ export function readServerConfig(env: NodeJS.ProcessEnv = process.env) {
     "BETTER_AUTH_SECRET",
     "GOOGLE_CLIENT_ID",
     "GOOGLE_CLIENT_SECRET",
+    aiProvider === "gemini" ? "GEMINI_API_KEY" : "OPENAI_API_KEY",
   ];
   if (production)
     required.push(
       "CLIENT_URL",
-      "OPENAI_API_KEY",
       "PINECONE_API_KEY",
       "PINECONE_INDEX",
       "CLOUDINARY_CLOUD_NAME",

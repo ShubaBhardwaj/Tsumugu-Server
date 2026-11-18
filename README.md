@@ -22,7 +22,7 @@
 | Reliability | Durable jobs, retries, recovery, and cleanup for interrupted processing. |
 | Mobile contract | Stable collection/source bindings, idempotent submissions, content replacement, and explicit deletion semantics. |
 
-**Stack:** Express 5, TypeScript, Prisma/PostgreSQL, Better Auth, Inngest, OpenAI, Pinecone, Cloudinary, Firecrawl, and optional Tavily/Mem0. Bun manages packages; the production build runs on Node.js. Controllers validate requests, services hold business logic, and repositories manage persistence.
+**Stack:** Express 5, TypeScript, Prisma/PostgreSQL, Better Auth, Inngest, OpenAI or Gemini, Pinecone, Cloudinary, Firecrawl, and optional Tavily/Mem0. Bun manages packages; the production build runs on Node.js. Controllers validate requests, services hold business logic, and repositories manage persistence.
 
 ## Contents
 
@@ -45,6 +45,14 @@
 `CLIENT_URL` is the frontend origin, defaulting to `http://localhost:3001` in development. `BETTER_AUTH_URL` is the backend auth base URL; do not use it as the frontend origin. Google sign-in and API sessions use Better Auth cookies. Protected endpoints require a valid session. Cross-user or wrong-workspace records return 404; missing sessions return 401.
 
 Production uses `bun run build` and `bun run start`. Set `NODE_ENV=production`, explicit `CLIENT_URL`, Inngest event/signing keys, and all enabled core provider settings. Production rejects `INNGEST_DEV=true`. Register `/api/inngest` with the production Inngest environment. The two registered functions execute jobs and recover pending work once a minute. Do not deploy the old server over the new schema's marked-deleted records; see the change design's migration/rollback instructions.
+
+### AI provider selection
+
+Set `AI_PROVIDER=openai` (the default) with `OPENAI_API_KEY`, or set `AI_PROVIDER=gemini` with `GEMINI_API_KEY`. Only the selected AI key is required. Put the key in the server's private `.env`, never in a mobile build or repository. Deploy/restart this backend after changing the setting. Gemini uses `gemini-2.5-flash-lite` for chat and study generation and `gemini-embedding-001` at 1,536 dimensions for indexing and retrieval. The existing Pinecone index must have 1,536 dimensions. OpenAI keeps its existing models and vectors.
+
+The two providers use separate Pinecone namespaces. After switching, a saved source may still show database status `READY` but also return `needsReindex: true`; it cannot be used for retrieval or new study artifacts under the active provider. Call `POST /api/workspaces/:workspaceId/sources/:sourceId/reprocess` for each such source, then poll its job/source until it is `READY` with `needsReindex: false`. Reprocessing keeps the source ID and replaces its previous index. Switching back requires reprocessing sources indexed under the other provider. A failed or quota-limited job remains unsuccessful and must be retried after fixing the cause; the backend never falls back to the other provider.
+
+Google's [Gemini pricing and free-tier terms](https://ai.google.dev/gemini-api/docs/pricing) and [embedding documentation](https://ai.google.dev/gemini-api/docs/embeddings) can change. Check eligibility and quotas before testing. The free tier may use submitted content to improve Google products, so use disposable test documents rather than private user data. This change does not add OCR; image-only PDFs still need an extractable-text/OCR path.
 
 The Inngest app ID is `Tsumugu`. It registers `background-job` for `background/run` events and `recover-background-jobs` for the one-minute recovery schedule. Source processing, artifact generation, and conversation summarization still run as `SOURCE`, `ARTIFACT`, and `SUMMARY` database jobs inside `background-job`; they are no longer separate Inngest functions. Changing the app ID creates a new Inngest app, so sync `Tsumugu` after deployment and retire the old app only after checking for active runs.
 
@@ -120,7 +128,7 @@ Text source example:
 }
 ```
 
-Use `MARKDOWN` for Markdown content. Source status progresses through `PENDING`, `PROCESSING`, `READY`, or `FAILED`. Read the source's `jobId` for progress and safe errors. The worker extracts PDF pages, splits text into at most 1,000-character pieces (100-character overlap), generates embeddings, and indexes the current run. An inaccessible original PDF fails with a re-upload/retry message. Reprocessing keeps the source ID and replaces obsolete chunks. Existing ready legacy vectors are checked against live sources until reprocessed.
+Use `MARKDOWN` for Markdown content. Source status progresses through `PENDING`, `PROCESSING`, `READY`, or `FAILED`. Read the source's `jobId` for progress and safe errors. `needsReindex` indicates whether a previously indexed source needs processing under the selected AI provider. The worker extracts PDF pages, splits text into at most 1,000-character pieces (100-character overlap), generates embeddings, and indexes the current run. An inaccessible original PDF fails with a re-upload/retry message. Reprocessing keeps the source ID and replaces obsolete chunks. Existing ready legacy OpenAI vectors remain usable under OpenAI until reprocessed.
 
 Chat example:
 
@@ -138,7 +146,7 @@ Chat example:
 }
 ```
 
-Send the returned conversation ID as `conversationId` to continue. Supported models remain `gpt-4o-mini` and `gpt-4o`. UI messages require IDs, user/assistant roles, and supported parts. Text, step boundaries, and validated `tool-web_search` assistant parts are supported. The final message must be user text. The server uses owned persisted history, not submitted assistant text, as authoritative history. Limits: 256 KiB JSON body, 100 UI messages, 8,000 text characters per message. Malformed data returns 400; oversized JSON returns 413 before AI calls. The permitted browser can read `X-Conversation-Id`. Failures after streaming begins are stream errors; interrupted answers are not saved as complete.
+Send the returned conversation ID as `conversationId` to continue. OpenAI accepts `gpt-4o-mini` and `gpt-4o`; Gemini accepts `gemini-2.5-flash-lite`. Omit `model` to use the active provider's default. An explicit model from the other provider returns 400, while an old saved workspace preference is mapped to the active default at runtime. UI messages require IDs, user/assistant roles, and supported parts. Text, step boundaries, and validated `tool-web_search` assistant parts are supported. The final message must be user text. The server uses owned persisted history, not submitted assistant text, as authoritative history. Limits: 256 KiB JSON body, 100 UI messages, 8,000 text characters per message. Malformed data returns 400; oversized JSON returns 413 before AI calls. The permitted browser can read `X-Conversation-Id`. Failures after streaming begins are stream errors; interrupted answers are not saved as complete.
 
 Artifact example:
 

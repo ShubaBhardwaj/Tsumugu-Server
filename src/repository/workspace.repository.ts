@@ -1,4 +1,5 @@
 import prisma from "../lib/db.js";
+import { defaultChatModel } from "../lib/ai-provider.js";
 import type {
   CreateWorkspaceInput,
   UpdateWorkspaceInput,
@@ -51,6 +52,7 @@ export function createWorkspaceRecord(
     data: {
       userId,
       ...fields,
+      defaultModel: fields.defaultModel ?? defaultChatModel(),
     },
     select: workspaceSelect,
   });

@@ -5,7 +5,7 @@ import {
 import { scrapeWebsite } from "./firecrawl.js";
 import { fetchYoutubeTranscript } from "./youtube.js";
 import { extractPdfFromCloudinary } from "./pdf.js";
-import { embedTexts } from "./openai.js";
+import { embedTexts } from "./embeddings.js";
 import {
   upsertSourceVectors,
   deleteSourceVectors,
@@ -13,6 +13,7 @@ import {
   queryWorkspaceVectors,
   deleteJobVectors,
   deleteVectorIds,
+  deleteSourceVectorsInOtherProfiles,
 } from "./pinecone.js";
 export const sourceProviders = {
   uploadPdfToCloudinary,
@@ -27,4 +28,5 @@ export const sourceProviders = {
   queryWorkspaceVectors,
   deleteJobVectors,
   deleteVectorIds,
+  deleteSourceVectorsInOtherProfiles,
 };

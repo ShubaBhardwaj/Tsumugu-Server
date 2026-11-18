@@ -1,11 +1,11 @@
 import { Output } from "ai";
 import { aiProvider } from "../lib/ai-provider.js";
-import { openai } from "@ai-sdk/openai";
 import { z } from "zod";
-import { CHAT_MODEL } from "../lib/ai-config.js";
+import { languageModel } from "../lib/ai-provider.js";
 import { findSourcesByWorkspaceId } from "../repository/source.repository.js";
 import type { ArtifactRecord } from "../repository/artifact.repository.js";
 import { ValidationError } from "../types/app-error.js";
+import { sourceIsSearchable } from "../lib/embedding-profile.js";
 import type { ArtifactOptions } from "../validators/artifact.validator.js";
 
 const MAX_CONTEXT_CHARS = 120_000;
@@ -87,11 +87,12 @@ export async function gatherSourceContext(
   const sources = await findSourcesByWorkspaceId(workspaceId, {
     status: "READY",
   });
+  const searchableSources = sources.filter(sourceIsSearchable);
 
   const ids = sourceIds === undefined ? undefined : [...new Set(sourceIds)];
   const selected = ids
-    ? ids.map((id) => sources.find((s) => s.id === id))
-    : sources.filter((s) => s.content?.trim());
+    ? ids.map((id) => searchableSources.find((s) => s.id === id))
+    : searchableSources.filter((s) => s.content?.trim());
   if (!selected.length || selected.some((s) => !s || !s.content?.trim()))
     throw new ValidationError(
       "Select ready sources with usable text from this workspace",
@@ -149,7 +150,7 @@ export async function generateArtifactContent(
   if (options?.topic) {
     const evidenceSchema = z.object({ supported: z.boolean() });
     const evidence = await aiProvider.generateText({
-      model: openai(CHAT_MODEL),
+      model: languageModel(),
       abortSignal: AbortSignal.timeout(30000),
       maxRetries: 0,
       system:
@@ -171,7 +172,7 @@ export async function generateArtifactContent(
   switch (type) {
     case "SUMMARY": {
       const result = await aiProvider.generateText({
-        model: openai(CHAT_MODEL),
+        model: languageModel(),
         abortSignal: AbortSignal.timeout(30000),
         maxRetries: 0,
         system,
@@ -181,7 +182,7 @@ export async function generateArtifactContent(
     }
     case "TAKEAWAYS": {
       const result = await aiProvider.generateText({
-        model: openai(CHAT_MODEL),
+        model: languageModel(),
         abortSignal: AbortSignal.timeout(30000),
         maxRetries: 0,
         system,
@@ -192,7 +193,7 @@ export async function generateArtifactContent(
     }
     case "FLASHCARDS": {
       const result = await aiProvider.generateText({
-        model: openai(CHAT_MODEL),
+        model: languageModel(),
         abortSignal: AbortSignal.timeout(30000),
         maxRetries: 0,
         system,
@@ -209,7 +210,7 @@ export async function generateArtifactContent(
     }
     case "QUIZ": {
       const result = await aiProvider.generateText({
-        model: openai(CHAT_MODEL),
+        model: languageModel(),
         abortSignal: AbortSignal.timeout(30000),
         maxRetries: 0,
         system,
@@ -226,7 +227,7 @@ export async function generateArtifactContent(
     }
     case "MINDMAP": {
       const result = await aiProvider.generateText({
-        model: openai(CHAT_MODEL),
+        model: languageModel(),
         abortSignal: AbortSignal.timeout(30000),
         maxRetries: 0,
         system,
@@ -237,7 +238,7 @@ export async function generateArtifactContent(
     }
     case "REPORT": {
       const result = await aiProvider.generateText({
-        model: openai(CHAT_MODEL),
+        model: languageModel(),
         abortSignal: AbortSignal.timeout(30000),
         maxRetries: 0,
         system,

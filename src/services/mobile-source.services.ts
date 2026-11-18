@@ -7,6 +7,7 @@ import {
   urlContentRevision,
 } from "../lib/source-identity.js";
 import { sourceProviders } from "../lib/source-providers.js";
+import { sourceNeedsReindex } from "../lib/embedding-profile.js";
 import {
   createJob,
   workspaceTransaction,
@@ -74,6 +75,7 @@ const sourceResponse = (
   binding: { clientItemKey: string; contentRevision: string },
 ) => ({
   ...source,
+  needsReindex: sourceNeedsReindex(source as { status: string; metadata: unknown }),
   clientItemKey: binding.clientItemKey,
   contentRevision: binding.contentRevision,
 });

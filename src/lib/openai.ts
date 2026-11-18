@@ -1,6 +1,5 @@
 import OpenAI from "openai";
 import {
-  CHAT_MODEL,
   EMBEDDING_DIMENSIONS,
   EMBEDDING_MODEL,
 } from "./ai-config.js";

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { safeValidateUIMessages } from "ai";
-import { CHAT_MODELS } from "../lib/ai-config.js";
+import { isSupportedChatModel } from "../lib/ai-provider.js";
 import { workspaceIdParamSchema } from "./workspace.validator.js";
 import { ValidationError } from "../types/app-error.js";
 export const conversationIdParamSchema = workspaceIdParamSchema.extend({
@@ -40,7 +40,7 @@ export const chatBodySchema = z.object({
     )
     .min(1)
     .max(100),
-  model: z.enum(CHAT_MODELS).optional(),
+  model: z.string().refine(isSupportedChatModel, "Model is not available for the selected AI provider").optional(),
   webSearch: z.boolean().optional(),
 });
 export async function parseChatBody(body: unknown) {

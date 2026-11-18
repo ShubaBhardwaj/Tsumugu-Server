@@ -24,6 +24,7 @@
     "typescript": "^7.0.2"
   },
   "dependencies": {
+    "@ai-sdk/google": "^4.0.122",
     "@ai-sdk/openai": "^4.0.118",
     "@better-auth/expo": "1.7.23",
     "@pinecone-database/pinecone": "^9.2.0",

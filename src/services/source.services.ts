@@ -1,4 +1,5 @@
 import { sourceProviders } from "../lib/source-providers.js";
+import { sourceNeedsReindex } from "../lib/embedding-profile.js";
 import {
   findSourceByIdAndWorkspaceId,
   findSourcesByWorkspaceId,
@@ -39,7 +40,10 @@ async function createAndProcessSource(userId: string, data: CreateSourceData) {
     });
   });
   kickJob(result.jobId!);
-  return result;
+  return withSourceReadiness(result);
+}
+function withSourceReadiness<T extends { status: string; metadata: unknown }>(source: T) {
+  return { ...source, needsReindex: sourceNeedsReindex(source) };
 }
 export async function listSourcesForWorkspace(
   workspaceId: string,
@@ -47,7 +51,7 @@ export async function listSourcesForWorkspace(
   filters: ListSourcesQuery = {},
 ) {
   await getWorkspaceByIdForUser(workspaceId, userId);
-  return findSourcesByWorkspaceId(workspaceId, filters);
+  return (await findSourcesByWorkspaceId(workspaceId, filters)).map(withSourceReadiness);
 }
 export async function getSourceForWorkspace(
   workspaceId: string,
@@ -57,7 +61,7 @@ export async function getSourceForWorkspace(
   await getWorkspaceByIdForUser(workspaceId, userId);
   const source = await findSourceByIdAndWorkspaceId(sourceId, workspaceId);
   if (!source) throw new NotFoundError("Source not found");
-  return source;
+  return withSourceReadiness(source);
 }
 export async function bulkDeleteSourcesForWorkspace(
   workspaceId: string,

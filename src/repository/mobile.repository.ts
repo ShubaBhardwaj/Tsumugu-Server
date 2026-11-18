@@ -3,6 +3,7 @@ import { lockWorkspace, type Transaction } from "./job.repository.js";
 import { workspaceSelect } from "./workspace.repository.js";
 import type { CreateWorkspaceInput } from "../validators/workspace.validator.js";
 import { AppError } from "../types/app-error.js";
+import { defaultChatModel } from "../lib/ai-provider.js";
 
 export function resolveMobileWorkspace(
   userId: string,
@@ -41,7 +42,7 @@ export function resolveMobileWorkspace(
       return { workspace, created: false };
     }
     const workspace = await tx.workspace.create({
-      data: { userId, ...fields },
+      data: { userId, ...fields, defaultModel: fields.defaultModel ?? defaultChatModel() },
       select: workspaceSelect,
     });
     await tx.mobileWorkspaceBinding.create({

@@ -175,6 +175,9 @@ suite("isolated PostgreSQL and HTTP flows", () => {
             vectors.delete(id);
       },
     );
+    spyOn(sourceProviders, "deleteSourceVectorsInOtherProfiles").mockImplementation(
+      async () => undefined,
+    );
     spyOn(sourceProviders, "deleteJobVectors").mockImplementation(
       async (workspaceId, sourceId, jobId, runId) => {
         for (const [id, record] of vectors)
@@ -846,6 +849,38 @@ suite("isolated PostgreSQL and HTTP flows", () => {
       [...vectors.values()].filter((v) => v.metadata.sourceId === row.id),
     ).toHaveLength(2);
   });
+  test("provider switch excludes old vectors until the same source is reprocessed", async () => {
+    const previous = process.env.AI_PROVIDER;
+    try {
+      process.env.AI_PROVIDER = "openai";
+      const row = await source("Cells have membranes and carry out life processes.");
+      await execute(row.jobId);
+      expect((await json(await call("GET", `/api/workspaces/${ws}/sources/${row.id}`))).needsReindex).toBe(false);
+      process.env.AI_PROVIDER = "gemini";
+      expect((await json(await call("GET", `/api/workspaces/${ws}/sources/${row.id}`))).needsReindex).toBe(true);
+      expect(await retrieveWorkspaceContext(ws, "cells")).toEqual([]);
+      const next = await reprocessSource(ws, row.id, "alice");
+      await execute(next.jobId);
+      const indexed = await json(await call("GET", `/api/workspaces/${ws}/sources/${row.id}`));
+      expect(indexed.id).toBe(row.id);
+      expect(indexed.needsReindex).toBe(false);
+      expect(indexed.metadata.embeddingProfile).toContain("gemini:");
+      expect((await retrieveWorkspaceContext(ws, "cells")).length).toBeGreaterThan(0);
+      expect(sourceProviders.deleteSourceVectorsInOtherProfiles).toHaveBeenCalledWith(ws, row.id);
+      const geminiWorkspace = await json(await call("POST", "/api/workspaces", { title: "Gemini study" }));
+      expect(geminiWorkspace.defaultModel).toBe("gemini-2.5-flash-lite");
+      process.env.AI_PROVIDER = "openai";
+      expect((await json(await call("GET", `/api/workspaces/${ws}/sources/${row.id}`))).needsReindex).toBe(true);
+      expect(await retrieveWorkspaceContext(ws, "cells")).toEqual([]);
+      await deleteSourceForWorkspace(ws, row.id, "alice");
+      const cleanup = await prisma.backgroundJob.findFirstOrThrow({ where: { type: "SOURCE_CLEANUP", resourceId: row.id } });
+      await execute(cleanup.id);
+      expect(sourceProviders.deleteSourceVectors).toHaveBeenCalledWith(ws, row.id);
+    } finally {
+      if (previous === undefined) delete process.env.AI_PROVIDER;
+      else process.env.AI_PROVIDER = previous;
+    }
+  });
   test("deleted sources immediately disappear; cleanup retries and removes files", async () => {
     const row = await source();
     await execute(row.jobId);
@@ -938,7 +973,7 @@ suite("isolated PostgreSQL and HTTP flows", () => {
     const row = await source("x".repeat(130000));
     await prisma.source.update({
       where: { id: row.id },
-      data: { status: "READY" },
+      data: { status: "READY", metadata: { indexRun: "fixture-openai-run" } },
     });
     const extra = await prisma.source.create({
       data: {
@@ -947,6 +982,7 @@ suite("isolated PostgreSQL and HTTP flows", () => {
         title: "Extra",
         content: "extra",
         status: "READY",
+        metadata: { indexRun: "fixture-openai-run" },
       },
     });
     const result = await gatherSourceContext(ws, [row.id, extra.id]);
@@ -1000,6 +1036,34 @@ suite("isolated PostgreSQL and HTTP flows", () => {
       (await call("DELETE", `/api/workspaces/${ws}/conversations/${id}`))
         .status,
     ).toBe(204);
+  });
+  test("Gemini-only chat selects the Gemini model and keeps saved stream history", async () => {
+    const oldProvider = process.env.AI_PROVIDER;
+    const oldGeminiKey = process.env.GEMINI_API_KEY;
+    const oldOpenAIKey = process.env.OPENAI_API_KEY;
+    try {
+      process.env.AI_PROVIDER = "gemini";
+      process.env.GEMINI_API_KEY = "test-only";
+      delete process.env.OPENAI_API_KEY;
+      const row = await source("Biology is the study of living things.");
+      await execute(row.jobId);
+      const response = await call("POST", `/api/workspaces/${ws}/chat`, {
+        messages: [{ id: "gemini-user", role: "user", parts: [{ type: "text", text: "Explain biology" }] }],
+      });
+      expect(response.status).toBe(200);
+      expect(await response.text()).toContain("Answer from the source");
+      expect(chatModelProvider.get).toHaveBeenCalledWith("gemini-2.5-flash-lite");
+      const messages = await prisma.message.findMany({ orderBy: { position: "asc" } });
+      expect(messages.map((message) => message.role)).toEqual(["USER", "ASSISTANT"]);
+      expect(messages[1]!.citations).toBeTruthy();
+    } finally {
+      if (oldProvider === undefined) delete process.env.AI_PROVIDER;
+      else process.env.AI_PROVIDER = oldProvider;
+      if (oldGeminiKey === undefined) delete process.env.GEMINI_API_KEY;
+      else process.env.GEMINI_API_KEY = oldGeminiKey;
+      if (oldOpenAIKey === undefined) delete process.env.OPENAI_API_KEY;
+      else process.env.OPENAI_API_KEY = oldOpenAIKey;
+    }
   });
   test("stream errors do not persist a completed assistant answer", async () => {
     spyOn(chatModelProvider, "get").mockReturnValue(model("partial", true));
@@ -1187,9 +1251,10 @@ suite("isolated PostgreSQL and HTTP flows", () => {
   test("workspace cleanup hides children, cancels work and deletes its files and namespace", async () => {
     const row = await source();
     await execute(row.jobId);
+    const indexed = await prisma.source.findUniqueOrThrow({ where: { id: row.id } });
     await prisma.source.update({
       where: { id: row.id },
-      data: { metadata: { publicId: "pdf" } },
+      data: { metadata: { ...(indexed.metadata as object ?? {}), publicId: "pdf" } },
     });
     const conversation = await json(
       await call("POST", `/api/workspaces/${ws}/conversations`, {

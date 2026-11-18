@@ -1,11 +1,13 @@
 import prisma from "../lib/db.js";
 import { chunkPages, chunkText } from "../lib/chunking.js";
 import { sourceProviders } from "../lib/source-providers.js";
+import { activeEmbeddingProfile, indexedSourceProfile } from "../lib/embedding-profile.js";
 import { ValidationError } from "../types/app-error.js";
 import type { JobContext } from "./job.services.js";
 
 export async function processSourceJob(ctx: JobContext) {
   const runId = `${ctx.job.id}:${ctx.job.deliveryGeneration}`;
+  const embeddingProfile = activeEmbeddingProfile();
   const source = await ctx.commit(async (tx) => {
     return tx.source.update({
       where: { id: ctx.job.resourceId },
@@ -44,11 +46,6 @@ export async function processSourceJob(ctx: JobContext) {
     where: { sourceId: source.id },
     select: { id: true },
   });
-  await ctx.check();
-  await sourceProviders.deleteVectorIds(
-    source.workspaceId,
-    oldChunks.map((c) => c.id),
-  );
   await ctx.check();
   const chunks = await ctx.commit(async (tx) => {
     await tx.sourceChunk.deleteMany({ where: { sourceId: source.id } });
@@ -95,6 +92,7 @@ export async function processSourceJob(ctx: JobContext) {
             text: chunk.content,
             jobId: ctx.job.id,
             runId,
+            embeddingProfile,
             ...((chunk.metadata as any)?.page
               ? { page: (chunk.metadata as any).page }
               : {}),
@@ -103,6 +101,13 @@ export async function processSourceJob(ctx: JobContext) {
       );
       await ctx.check();
     }
+    await sourceProviders.deleteVectorIds(
+      source.workspaceId,
+      oldChunks.map((chunk) => chunk.id),
+    );
+    await ctx.check();
+    if (indexedSourceProfile(metadata) && indexedSourceProfile(metadata) !== embeddingProfile)
+      await sourceProviders.deleteSourceVectorsInOtherProfiles(source.workspaceId, source.id);
     await ctx.commit((tx) =>
       tx.source.update({
         where: { id: source.id },
@@ -114,6 +119,7 @@ export async function processSourceJob(ctx: JobContext) {
             chunkCount: chunks.length,
             indexedAt: new Date().toISOString(),
             indexRun: runId,
+            embeddingProfile,
             processingError: null,
           },
         },
